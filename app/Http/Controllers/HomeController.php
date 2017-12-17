@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
+use App\Avatar;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -23,6 +25,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        return view('home', ["avatars"=>Avatar::where('user_id', Auth::user()->id)->get()]);
     }
 }

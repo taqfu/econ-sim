@@ -38,8 +38,8 @@ class Map extends Model
         $buildings["docks"]=false;
         for ($y=0; $y<Map::MAX_Y; $y++){
             for ($x=0; $x<Map::MAX_X; $x++){
-                if ((1==rand(1, Map::MAX_Y/5) || $y==Map::MAX_Y-10) && $x==Map::MAX_X*.10 && $map[$x][$y]==1 && is_it_clear ($map, $x, $y, 10,10) && !$buildings["docks"]){
-                    $map = place_building ($map, $x, $y, 10, 10, 3);
+                if ((1==rand(1, Map::MAX_Y/5) || $y==Map::MAX_Y-10) && $x==Map::MAX_X*.05 && $map[$x][$y]==2 && Map::is_it_clear ($map, $x, $y, 10,10) && !$buildings["docks"]){
+                    $map = Map::place_building ($map, $x, $y, 10, 10, 3);
                     $buildings["docks"]=true;
                 }
             }
@@ -57,7 +57,7 @@ class Map extends Model
     public static function is_it_clear($map, $start_x, $start_y, $x_iterations, $y_iterations){
         for ($y=$start_y; $y<$start_y+$y_iterations; $y++){
             for ($x=$start_x; $x<$start_x+$x_iterations; $x++){
-                if ($map[$x][$y]!=1){
+                if ($map[$x][$y]!=2){
                   return false;
                 }
             }

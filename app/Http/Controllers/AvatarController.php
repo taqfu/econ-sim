@@ -62,7 +62,7 @@ class AvatarController extends Controller
      */
     public function show($id)
     {
-        //
+        
     }
 
     /**

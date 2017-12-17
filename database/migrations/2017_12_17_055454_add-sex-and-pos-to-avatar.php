@@ -14,7 +14,9 @@ class AddSexAndPosToAvatar extends Migration
     public function up()
     {
         Schema::table('avatars', function (Blueprint $table) {
-            //
+            $table->unsignedTinyInteger('sex');
+            $table->unsignedInteger('x');
+            $table->unsignedInteger('y');
         });
     }
 

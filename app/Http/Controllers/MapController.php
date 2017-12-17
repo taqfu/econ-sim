@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
+use App\Map;
 use Illuminate\Http\Request;
 
 class MapController extends Controller
@@ -23,7 +25,22 @@ class MapController extends Controller
      */
     public function create()
     {
-        //
+        if (Auth::guest() || Auth::user()->id!=1){
+            echo "Please leave and don't come here.";
+        }
+        $map = Map::generate_map();
+        $coordinates=0;
+        for ($y=0;$y<Map::MAX_Y;$y++){
+            for ($x=0; $x<Map::MAX_X;$x++){
+                $map_db = new Map;
+                $map_db->x = $x;
+                $map_db->y = $y;
+                $map_db->type = $map[$x][$y];
+                $map_db->save();
+                $coordinates++;
+            }
+        }
+        echo $coordinates;
     }
 
     /**

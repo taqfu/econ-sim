@@ -19,3 +19,4 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('a', 'AvatarController');
+Route::resource('map', 'MapController');

@@ -16,6 +16,11 @@ class CreateMapsTable extends Migration
         Schema::create('maps', function (Blueprint $table) {
             $table->increments('id');
             $table->timestamps();
+            $table->unsignedInteger("x");
+            $table->unsignedInteger("y");
+            $table->unsignedTinyInteger('type');
+
+
         });
     }
 

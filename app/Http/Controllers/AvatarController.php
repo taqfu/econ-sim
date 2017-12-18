@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Auth;
 use App\Avatar;
+use App\Map;
+
 use Illuminate\Http\Request;
 
 class AvatarController extends Controller
@@ -62,7 +64,7 @@ class AvatarController extends Controller
      */
     public function show($id)
     {
-        
+        return view("Avatar.show", ["id"=>$id]);
     }
 
     /**
@@ -97,5 +99,47 @@ class AvatarController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function map ($id){
+        define("MAP_SIZE", 25);
+        $map_type = NULL;
+        $avatar = Avatar::find($id);
+        $map_min_x = $avatar->x - floor(MAP_SIZE/2) >= 0 ? $avatar->x - floor(MAP_SIZE/2) : 0;
+        $map_max_x = $avatar->x + floor(MAP_SIZE/2) > Map::MAX_X ? Map::MAX_X : $avatar->x + floor(MAP_SIZE/2);
+        $map_min_y = $avatar->y - floor(MAP_SIZE/2) >= 0 ? $avatar->y - floor(MAP_SIZE/2) : 0;
+        $map_max_y = $avatar->y + floor(MAP_SIZE/2) > Map::MAX_Y ? Map::MAX_Y : $avatar->y + floor(MAP_SIZE/2);
+
+        $db_maps = Map::where('x', ">=", $map_min_x)->where("x", "<=", $map_max_x)->where("y", ">=", $map_min_y)->where("y", "<=", $map_max_y)->orderBy("y")->orderBy("x")->get();
+        $tyle_types = ["void", "water", "land", "docks"];
+
+        for ($y=$avatar->y - floor(MAP_SIZE/2); $y<=$avatar->y + floor(MAP_SIZE/2); $y++){
+              echo "<div class='row'>";
+            for ($x=$avatar->x - floor(MAP_SIZE/2); $x<=$avatar->x + floor(MAP_SIZE/2); $x++){
+                $map_type=0;
+                foreach($db_maps as $db_map){
+                    if ($db_map->x == $x && $db_map->y == $y){
+                        $map_type = $db_map->type;
+                    }
+                }
+
+
+                echo "<div class='tile " . $tyle_types[$map_type] . "'
+                  title='(" . $avatar->x . ", " . $avatar->y . ") ";
+                  if ($x == $avatar->x && $y == $avatar->y){
+                      echo " Player here";
+                  }
+                  echo "'>";
+                  if ($x == $avatar->x && $y == $avatar->y && $map_type!=3){
+                    echo "O";
+                  }
+
+
+                echo "</div>";
+                //echo "<div class='tile " . $tyle_types[$map[$x][$y]] . "'>" . $map[$x][$y] . "</div>";
+            }
+            echo "</div>";
+        }
+
     }
 }

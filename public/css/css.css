@@ -1,0 +1,31 @@
+.docks {
+    background-color:SaddleBrown;
+    cursor:pointer;
+}
+.land{
+    background-color:chartreuse ;
+}
+.void{
+    background-color:black;
+}
+#clock {
+    clear:both;
+}
+.row{
+
+  clear:both;
+  text-align:center;
+}
+.tile{
+   width:25px;
+   height:25px;
+   float:left;
+
+   text-align:center;
+   vertical-align:center;
+   //border:1px black solid;
+}
+.water{
+  background-color:blue;
+
+}

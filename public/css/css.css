@@ -8,13 +8,16 @@
 .void{
     background-color:black;
 }
+.tree{
+    background-color:ForestGreen;
+    color:white;
+}
 #clock {
     clear:both;
 }
-.row{
+.game-row{
 
   clear:both;
-  text-align:center;
 }
 .tile{
    width:25px;

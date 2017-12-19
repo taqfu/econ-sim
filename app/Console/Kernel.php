@@ -5,6 +5,7 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
+use \App\Game;
 class Kernel extends ConsoleKernel
 {
     /**
@@ -24,8 +25,15 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $schedule->call(function(){
+            $interval_start = microtime(true);
+            while (true) {
+                if (microtime(true)-$interval_start>1){
+                    Game::run();
+                    $interval_start = microtime(true);
+                }
+            }
+        });
     }
 
     /**

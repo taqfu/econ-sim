@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Auth;
 use App\Avatar;
+use App\Game;
 use App\Map;
 
 use Illuminate\Http\Request;
@@ -111,10 +112,10 @@ class AvatarController extends Controller
         $map_max_y = $avatar->y + floor(MAP_SIZE/2) > Map::MAX_Y ? Map::MAX_Y : $avatar->y + floor(MAP_SIZE/2);
 
         $db_maps = Map::where('x', ">=", $map_min_x)->where("x", "<=", $map_max_x)->where("y", ">=", $map_min_y)->where("y", "<=", $map_max_y)->orderBy("y")->orderBy("x")->get();
-        $tyle_types = ["void", "water", "land", "docks"];
-
+        $tyle_types = ["void", "water", "land", "docks", "tree"];
+        echo "<div id='status' class='game-row'>Name:" . $avatar->name . " Sex:" .  Avatar::SEX[$avatar->sex] . " Age:" . $avatar->age . " Health:" . $avatar->health . "% Food:" . $avatar->calories / $avatar->calories_req * 100 ."%</div>";
         for ($y=$avatar->y - floor(MAP_SIZE/2); $y<=$avatar->y + floor(MAP_SIZE/2); $y++){
-              echo "<div class='row'>";
+              echo "<div class='game-row'>";
             for ($x=$avatar->x - floor(MAP_SIZE/2); $x<=$avatar->x + floor(MAP_SIZE/2); $x++){
                 $map_type=0;
                 foreach($db_maps as $db_map){
@@ -140,6 +141,6 @@ class AvatarController extends Controller
             }
             echo "</div>";
         }
-
+    echo "<div class='game-row'>" . Game::clock() . " Coordinates: (" . $avatar->x . ", " . $avatar->y . ")</div>";
     }
 }

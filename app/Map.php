@@ -8,8 +8,9 @@ class Map extends Model
 {
     CONST MAX_X = 100;
     CONST MAX_Y = 100;
+    CONST TREE_PERCENT = .5;
     public static function generate_map(){
-        return Map::generate_buildings(Map::generate_water_and_land(Map::generate_blank_map()));
+        return Map::generate_forest(Map::generate_buildings(Map::generate_water_and_land(Map::generate_blank_map())));
     }
     public static function generate_blank_map(){
         $map = [];
@@ -20,7 +21,19 @@ class Map extends Model
         }
         return $map;
     }
-
+    public static function generate_forest($map){
+        $max_num_of_trees = Map::MAX_X * Map::MAX_Y * Map::TREE_PERCENT;
+        $num_of_trees = 0;
+        while ($num_of_trees<$max_num_of_trees){
+            $x = rand (0, Map::MAX_X-1);
+            $y = rand (0, Map::MAX_Y-1);
+            if ($map[$x][$y]==2){
+                $num_of_trees++;
+                $map[$x][$y]=4;
+            }
+        }
+        return $map;
+    }
     public static function generate_water_and_land($map){
         for ($y=0; $y<Map::MAX_Y; $y++){
             for ($x=0; $x<Map::MAX_X; $x++){

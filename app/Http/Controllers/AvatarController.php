@@ -28,7 +28,7 @@ class AvatarController extends Controller
      */
     public function create()
     {
-		return view('Avatar.create', ["name"=>"Ronald Wilkerson"]);
+		    return view('Avatar.create', ["name"=>"Ronald Wilkerson"]);
     }
 
     /**
@@ -39,22 +39,29 @@ class AvatarController extends Controller
      */
     public function store(Request $request)
     {
-    if (Auth::guest()){
-        echo "You need to be logged in in order to do this.";
-    }
-		$avatar = new Avatar;
-		$avatar->name = $request->name; // There's a real risk that users can edit this in the form and create whatever names they want
-    $avatar->user_id = Auth::user()->id;
-    $avatar->sleep_at = date("Y-m-d H:i:s");
-	  $avatar->sleep_req = rand(Avatar::AVG_SLEEP_REQ-ceil(Avatar::AVG_SLEEP_REQ*.25), Avatar::AVG_SLEEP_REQ+ceil(Avatar::AVG_SLEEP_REQ*.25));
-		$avatar->sleep = $avatar->sleep_req;
-    $avatar->eat_at = date("Y-m-d H:i:s");
-		$avatar->calories_req = rand(Avatar::AVG_CAL_REQ-round(Avatar::AVG_CAL_REQ*.1), Avatar::AVG_CAL_REQ-round(Avatar::AVG_CAL_REQ*.1));
-		$avatar->calories = $avatar->calories_req;
-		$avatar->max_days_to_starve =  rand(Avatar::AVG_DAYS_TO_STARVE-ceil(Avatar::AVG_DAYS_TO_STARVE), Avatar::AVG_DAYS_TO_STARVE+ceil(Avatar::AVG_DAYS_TO_STARVE));
-		$avatar->save();
+        if (Auth::guest()){
+            echo "You need to be logged in in order to do this.";
+        }
+    		$avatar = new Avatar;
+    		$avatar->name = $request->name; // There's a real risk that users can edit this in the form and create whatever names they want
+        $avatar->user_id = Auth::user()->id;
+        $avatar->sleep_at = date("Y-m-d H:i:s");
+    	  $avatar->sleep_req = rand(Avatar::AVG_SLEEP_REQ-ceil(Avatar::AVG_SLEEP_REQ*.25), Avatar::AVG_SLEEP_REQ+ceil(Avatar::AVG_SLEEP_REQ*.25));
+    		$avatar->sleep = $avatar->sleep_req;
+        $avatar->eat_at = date("Y-m-d H:i:s");
+    		$avatar->calories_req = rand(Avatar::AVG_CAL_REQ-round(Avatar::AVG_CAL_REQ*.1), Avatar::AVG_CAL_REQ-round(Avatar::AVG_CAL_REQ*.1));
+    		$avatar->calories = $avatar->calories_req;
+    		$avatar->max_days_to_starve =  rand(Avatar::AVG_DAYS_TO_STARVE-ceil(Avatar::AVG_DAYS_TO_STARVE), Avatar::AVG_DAYS_TO_STARVE+ceil(Avatar::AVG_DAYS_TO_STARVE));
+    		$avatar->save();
 
-
+        for($hour=0;$hour<24;$hour++){
+            $schedule = new Schedule;
+            $schedule->user_id = Auth::user()->id;
+            $schedule->hour = $hour;
+            $wake_up_at = $avatar->sleep_req-4;
+            $schedule->type= ($hour>19 || $hour<=$wake_up_at ) ? 0 : 1;
+            $schedule->save();
+        }
     }
 
     /**

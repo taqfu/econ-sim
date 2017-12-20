@@ -19,6 +19,9 @@
 
   clear:both;
 }
+.schedule-cell{
+    width:100px;
+}
 .tile{
    width:25px;
    height:25px;

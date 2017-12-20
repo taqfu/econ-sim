@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
-use App\Avatar;
-use App\Schedule;
 use Illuminate\Http\Request;
 
-class ScheduleController extends Controller
+class ActivityTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,14 +13,7 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-        if (Auth::guest()){
-            echo "You need to be logged in in order to do this.";
-        }
-        $schedules = Schedule::where("user_id", Auth::user()->id)->orderBy('hour')->get();
-        return view("Schedule.index", [
-          "schedules"=>$schedules,
-          "avatar"=>Avatar::find(Auth::user()->id),
-        ]);
+        //
     }
 
     /**
@@ -44,12 +34,7 @@ class ScheduleController extends Controller
      */
     public function store(Request $request)
     {
-        for ($hour=0;$hour<24;$hour++){
-            $schedule = Schedule::where("user_id", Auth::user()->id)->where('hour', $hour)->first();
-            $schedule->type = $request[$hour];
-            $schedule->save();
-        }
-        return back();
+        //
     }
 
     /**
@@ -71,7 +56,7 @@ class ScheduleController extends Controller
      */
     public function edit($id)
     {
-
+        //
     }
 
     /**

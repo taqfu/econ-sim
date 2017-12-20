@@ -18,6 +18,11 @@ class Game extends Model
             $new_player_pos=null;
             $minute = date("i");
             $second = date("s");
+            $ig_hour = floor(($minute + (round(($second+1)/60, 2)))/2.5);
+            $schedule_type = Schedule::fetch_type($avatar->id, $ig_hour);
+            if ($schedule_type==0){
+              
+            }
             $sleeping = false; //($minute>57 || $minute<17 || ($second>29 && ($minute==57 || $minute==17)));
             if ($sleeping){
                 echo "Character is sleeping.\n";

@@ -9,6 +9,14 @@ class Map extends Model
     CONST MAX_X = 100;
     CONST MAX_Y = 100;
     CONST TREE_PERCENT = .5;
+
+    public static function fetch_type($x, $y){
+        $map = Map::where('x', $x)->where('y', $y)->first();
+        if ($map==null){
+            return null;
+        }
+        return $map->type;
+    }
     public static function generate_map(){
         return Map::generate_forest(Map::generate_buildings(Map::generate_water_and_land(Map::generate_blank_map())));
     }
@@ -59,14 +67,7 @@ class Map extends Model
         }
         return $map;
     }
-    public static function place_building ($map, $start_x, $start_y, $x_iterations, $y_iterations, $value){
-        for ($y=$start_y; $y<$start_y+$y_iterations; $y++){
-            for ($x=$start_x; $x<$start_x+$x_iterations; $x++){
-                $map[$x][$y]=$value;
-            }
-        }
-        return $map;
-    }
+
     public static function is_it_clear($map, $start_x, $start_y, $x_iterations, $y_iterations){
         for ($y=$start_y; $y<$start_y+$y_iterations; $y++){
             for ($x=$start_x; $x<$start_x+$x_iterations; $x++){
@@ -76,5 +77,13 @@ class Map extends Model
             }
         }
         return true;
+    }
+    public static function place_building ($map, $start_x, $start_y, $x_iterations, $y_iterations, $value){
+        for ($y=$start_y; $y<$start_y+$y_iterations; $y++){
+            for ($x=$start_x; $x<$start_x+$x_iterations; $x++){
+                $map[$x][$y]=$value;
+            }
+        }
+        return $map;
     }
 }

@@ -11,8 +11,11 @@
   Age:{{$avatar->age}}
   Health:{{$avatar->health}}%
   Food:{{$avatar->calories / $avatar->calories_req * 100}}%
+  Sleep:{{round($avatar->sleep / $avatar->sleep_req, 1) * 100}}%
   @if ($avatar->exhausted)
-  <span class='text-danger'>Exhausted</span>
+      <span class='text-danger'>Exhausted</span>
+  @elseif ($avatar->tired)
+      <span class='text-danger'>Tired</span>
   @endif
 
   {{ucfirst($activity->type->name . "ing")}} {{Activity::fetch_number_of_hours($activity)}}h
@@ -31,7 +34,7 @@ for ($y=$avatar->y - floor(Avatar::MAP_SIZE/2); $y<=$avatar->y + floor(Avatar::M
 
 
         echo "<div class='tile " . $tile_types[$map_type] . "'
-          title='(" . $avatar->x . ", " . $avatar->y . ") ";
+          title='(" . $x . ", " . $y . ") ";
           if ($x == $avatar->x && $y == $avatar->y){
               echo " Player here";
           }

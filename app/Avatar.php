@@ -12,15 +12,46 @@ class Avatar extends Model
 	const AVG_DAYS_TO_STARVE=24;
 	const MAP_SIZE=25;
 	const SEX = ["invalid", "XY", "XX"];
+	public static function are_they_outside($avatar_id){
+			$avatar = Avatar::find($avatar_id);
+
+			$map_type = Map::fetch_type($avatar->x, $avatar->y);
+		 	return $map_type!=3;
+	}
+	public static function increase_sleep($avatar_id, $num_of_hours_sleeping){
+			$avatar = Avatar::find($avatar_id);
+			$are_they_outside = Avatar::are_they_outside($avatar_id);
+			$are_they_in_bed = !(($avatar->bed_x==null && $avatar->bed_y==null )
+				|| ($avatar->bed_x != $avatar->x && $avatar->bed_y != $avatar->y));
+			$sleep_modifier = $are_they_in_bed ? 1 : .75;
+			if ($are_they_outside){
+					$sleep_modifier=.5;
+			}
+
+			$avatar->sleep += ($num_of_hours_sleeping - $avatar->sleep)*$sleep_modifier;
+			$avatar->save();
+
+	}
 	public static function change_age($avatar_id, $new_age){
 			$avatar = Avatar::find($avatar_id);
 			$avatar->age = $new_age;
 			$avatar->save();
 	}
 	public static function make_exhausted($avatar_id){
+			Avatar::lose_tiredness($avatar_id);
 			$avatar = Avatar::find($avatar_id);
 			$avatar->exhausted=true;
 			$avatar->save();
+	}
+	public static function make_tired($avatar_id){
+		$avatar = Avatar::find($avatar_id);
+		$avatar->tired=true;
+		$avatar->save();
+	}
+	public static function lose_tiredness($avatar_id){
+		$avatar = Avatar::find($avatar_id);
+		$avatar->tired = false;
+		$avatar->save();
 	}
 	public static function lose_exhaustion($avatar_id){
 			$avatar = Avatar::find($avatar_id);
@@ -40,13 +71,22 @@ class Avatar extends Model
 					$move_y = rand (-1, 1);
 					$new_player_pos = ["x"=>$player_pos["x"]+$move_x, "y"=>$player_pos["y"] + $move_y];
 					$map = Map::where("x", $new_player_pos["x"])->where("y", $new_player_pos["y"])->first();
+					var_dump($new_player_pos, $new_player_pos["x"]>=0, $new_player_pos["x"]< Map :: MAX_X,
+						$new_player_pos["y"]>=0, $new_player_pos["y"]< Map :: MAX_Y,
+						sizeof($map)>0);
+						if ($map!=null){
+								var_dump($map->type!=1);
+						} else {
+								echo "map type is null\n";
+						}
 					if ($new_player_pos["x"]>=0 && $new_player_pos["x"]< Map :: MAX_X
 					&& $new_player_pos["y"]>=0 && $new_player_pos["y"]< Map :: MAX_Y
 					&& sizeof($map)>0 && $map->type!=1){
-							//echo $meter . " -  (" . $new_player_pos["x"] . ", " . $new_player_pos["y"] . ") - " . $map->type . "\n";
+							echo $meter . " -  (" . $new_player_pos["x"] . ", " . $new_player_pos["y"] . ") - " . $map->type . "\n";
 							$meter++;
+							$player_pos = $new_player_pos;
+
 					}
-					$player_pos = $new_player_pos;
 			}
 			echo "Moving from (" . $player_pos["x"] . ", " . $player_pos["y"] . ") to (" . $new_player_pos["x"] . ", " . $new_player_pos["y"] . ")\n";
 

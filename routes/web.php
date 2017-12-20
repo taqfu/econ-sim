@@ -21,3 +21,5 @@ Route::get('a/{id}/map', 'AvatarController@map');
 Route::resource('a', 'AvatarController');
 Route::resource('map', 'MapController');
 Route::resource('schedule', 'ScheduleController');
+Route::resource('activity', "ActivityController");
+Route::resource('ActivityType', "ActivityTypeController");

@@ -20,8 +20,10 @@ class ScheduleController extends Controller
             echo "You need to be logged in in order to do this.";
         }
         $schedules = Schedule::where("user_id", Auth::user()->id)->orderBy('hour')->get();
+        $num_of_sleep_hours = count(Schedule::where("user_id", Auth::user()->id)->where('type', 0)->orderBy('hour')->get());
         return view("Schedule.index", [
           "schedules"=>$schedules,
+          "num_of_sleep_hours"=>$num_of_sleep_hours,
           "avatar"=>Avatar::find(Auth::user()->id),
         ]);
     }

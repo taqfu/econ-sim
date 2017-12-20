@@ -5,8 +5,7 @@
     refresh_map();
     setInterval(function (){
       refresh_map({{$id}});
-      refresh_clock({{$id}});
-    }, 1000);
+    }, 500);
 </script>
 
 <div id='map'></div>

@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Auth;
+use App\ActivityType;
 use Illuminate\Http\Request;
 
 class ActivityTypeController extends Controller
@@ -23,7 +24,8 @@ class ActivityTypeController extends Controller
      */
     public function create()
     {
-        //
+        $activity_types = ActivityType::get();
+        return view('ActivityType.create', ["activity_types"=>$activity_types]);
     }
 
     /**
@@ -34,8 +36,20 @@ class ActivityTypeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+          if (Auth::guest()){
+              return "Please leave and don't come back";
+          }
+
+          if (Auth::user()->id!=1){
+              return "You are not an Administrator.";
+          }
+
+          $activity_type = new ActivityType;
+          $activity_type->name = $request->ActivityTypeName;
+          $activity_type->save();
+          return back();
     }
+
 
     /**
      * Display the specified resource.
@@ -79,6 +93,8 @@ class ActivityTypeController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $activity_type = ActivityType::find($id);
+        $activity_type->delete();
+        return back();
     }
 }

@@ -11,43 +11,71 @@ class Game extends Model
     public static function run(){
         $avatars = Avatar::get();
         foreach ($avatars as $avatar){
-            $meter=0;
-            $interval_start = microtime(true);
-            $searching_for_next_move=true;
-            $player_pos = ["x"=>$avatar->x, "y"=>$avatar->y];
-            $new_player_pos=null;
+            $age_ig = 18+floor((time()-strtotime($avatar->created_at))/(86400*12));
+            if ($avatar->age<$age_ig){
+                Avatar::change_age($avatar->id, $age_ig);
+            } else if ($avatar->age>$age_ig){
+                error_log("In-game age is lower than avatar's age for Avatar #" . $avatar->id);
+            }
             $minute = date("i");
             $second = date("s");
             $ig_hour = floor(($minute + (round(($second+1)/60, 2)))/2.5);
-            $schedule_type = Schedule::fetch_type($avatar->id, $ig_hour);
-            if ($schedule_type==0){
-              
+            $schedule_type = Schedule::fetch_type($avatar->id, (int)$ig_hour);
+            $activity = Activity::fetch_current($avatar->id);
+            //echo "Schedule #" . $schedule_type . ": Avatar #" . $avatar->id . " is currently doing activity #" . $activity->activity_type_id . "\n";
+
+            if (!$avatar->exhausted && !Activity::have_they_slept_in_the_past_24_ig_hours(Activity::fetch_last_sleep($avatar->id))){
+                echo "Avatar #" . $avatar->id . " is exhausted now.\n";
+                Avatar::make_exhausted($avatar->id);
             }
-            $sleeping = false; //($minute>57 || $minute<17 || ($second>29 && ($minute==57 || $minute==17)));
-            if ($sleeping){
-                echo "Character is sleeping.\n";
-            } else if (!$sleeping){ //wandering
-                    $poss_map_pos = Map :: where("x", ">=", $avatar->x - 1 )->where("x", "<=", $avatar->x + 1)
-                      ->where("y", ">=", $avatar->y - 1 )->where("y", "<=", $avatar->y + 1)->get();
-                    while ($meter < Game::NUM_OF_METERS_PER_RL_SECOND){
-                        $move_x = rand (-1, 1);
-                        $move_y = rand (-1, 1);
-                        $new_player_pos = ["x"=>$player_pos["x"]+$move_x, "y"=>$player_pos["y"] + $move_y];
-                        $map = Map::where("x", $new_player_pos["x"])->where("y", $new_player_pos["y"])->first();
-                        if ($new_player_pos["x"]>=0 && $new_player_pos["x"]< Map :: MAX_X
-                        && $new_player_pos["y"]>=0 && $new_player_pos["y"]< Map :: MAX_Y
-                        && sizeof($map)>0 && $map->type!=1){
-                            echo $meter . " -  (" . $new_player_pos["x"] . ", " . $new_player_pos["y"] . ") - " . $map->type . "\n";
-                            $meter++;
-                        }
-                        $player_pos = $new_player_pos;
-                    }
-                echo "Moving from (" . $player_pos["x"] . ", " . $player_pos["y"] . ") to (" . $new_player_pos["x"] . ", " . $new_player_pos["y"] . ")\n";
+            if ($avatar->exhausted){
+                if ($activity==null){
+                    echo "Avatar #" . $avatar->id . " fell asleep from exhaustion.\n";
+                    Activity::sleep($avatar->id);
+                }
+                else if ($activity->activity_type_id!=ActivityType::SLEEP){
+                    echo "Avatar #" . $avatar->id . " is exhausted. Stopping Activity #" . $activity->activity_type_id . " and falling asleep.\n";
+                    Activity::end_last($avatar->id);
+                    Activity::sleep($avatar->id);
+                }
             }
-            $avatar_db = Avatar::find($avatar->id);
-            $avatar_db->x = $new_player_pos["x"];
-            $avatar_db->y = $new_player_pos["y"];
-            $avatar_db->save();
+            if ($activity->activity_type_id==ActivityType::SLEEP){
+                $num_of_hours_sleeping  =floor((time()-strtotime($activity->started_at))/150);
+                if ($avatar->sleep>=$avatar->sleep_req){
+                    echo "Avatar #" . $avatar->id . " is no longer exhausted after sleeping " . $num_of_hours_sleeping . " hours.\n";
+                    Avatar::lose_exhaustion($avatar->id);
+                }
+                if ($num_of_hours_sleeping!=$avatar->sleep){
+                    $avatar->sleep = $num_of_hours_sleeping;
+                    $avatar->save();
+                    echo "Avatar #" . $avatar->id . " has been sleeping for " . $avatar->sleep . " hours. \n";
+                }
+            } else if ($activity->activity_type_id==ActivityType::WANDER){
+
+                Avatar::wander($avatar->id);
+            }
+            if (!$avatar->exhausted && $schedule_type==0){
+                if ($activity==null){
+                    Activity::sleep($avatar->id);
+                    echo "Going to sleep now";
+                } else if ($activity->activity_type_id!=ActivityType::SLEEP){
+                  echo "Ending activity type #" . $activity->activity_type_id . " and sleeping...\n";
+                  Activity::end_last($avatar->id);
+                  Activity::sleep($avatar->id);
+
+                }
+            } else if (!$avatar->exhausted && $schedule_type==1){
+                if ($activity==null){
+                    echo "Going to wander now";
+                    Activity::wander($avatar->id);
+                } else if ($activity->activity_type_id!=2){
+                    echo "Ending activity type #" . $activity->activity_type_id . " and wandering...\n";
+                    Activity::end_last($avatar->id);
+                    Activity::wander($avatar->id);
+                }
+            }
+
+
         }
     }
 

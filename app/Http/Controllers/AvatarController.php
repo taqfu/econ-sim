@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Auth;
+use App\Activity;
+
 use App\Avatar;
 use App\Game;
 use App\Map;
@@ -72,6 +74,7 @@ class AvatarController extends Controller
      */
     public function show($id)
     {
+
         return view("Avatar.show", ["id"=>$id]);
     }
 
@@ -110,44 +113,20 @@ class AvatarController extends Controller
     }
 
     public function map ($id){
-        define("MAP_SIZE", 25);
         $map_type = NULL;
         $avatar = Avatar::find($id);
-        $map_min_x = $avatar->x - floor(MAP_SIZE/2) >= 0 ? $avatar->x - floor(MAP_SIZE/2) : 0;
-        $map_max_x = $avatar->x + floor(MAP_SIZE/2) > Map::MAX_X ? Map::MAX_X : $avatar->x + floor(MAP_SIZE/2);
-        $map_min_y = $avatar->y - floor(MAP_SIZE/2) >= 0 ? $avatar->y - floor(MAP_SIZE/2) : 0;
-        $map_max_y = $avatar->y + floor(MAP_SIZE/2) > Map::MAX_Y ? Map::MAX_Y : $avatar->y + floor(MAP_SIZE/2);
-
+        $activity = Activity::fetch_current($avatar->id);
+        $map_min_x = $avatar->x - floor(Avatar::MAP_SIZE/2) >= 0 ? $avatar->x - floor(Avatar::MAP_SIZE/2) : 0;
+        $map_max_x = $avatar->x + floor(Avatar::MAP_SIZE/2) > Map::MAX_X ? Map::MAX_X : $avatar->x + floor(Avatar::MAP_SIZE/2);
+        $map_min_y = $avatar->y - floor(Avatar::MAP_SIZE/2) >= 0 ? $avatar->y - floor(Avatar::MAP_SIZE/2) : 0;
+        $map_max_y = $avatar->y + floor(Avatar::MAP_SIZE/2) > Map::MAX_Y ? Map::MAX_Y : $avatar->y + floor(Avatar::MAP_SIZE/2);
         $db_maps = Map::where('x', ">=", $map_min_x)->where("x", "<=", $map_max_x)->where("y", ">=", $map_min_y)->where("y", "<=", $map_max_y)->orderBy("y")->orderBy("x")->get();
-        $tyle_types = ["void", "water", "land", "docks", "tree"];
-        echo "<div id='status' class='game-row'>Name:" . $avatar->name . " Sex:" .  Avatar::SEX[$avatar->sex] . " Age:" . $avatar->age . " Health:" . $avatar->health . "% Food:" . $avatar->calories / $avatar->calories_req * 100 ."%</div>";
-        for ($y=$avatar->y - floor(MAP_SIZE/2); $y<=$avatar->y + floor(MAP_SIZE/2); $y++){
-              echo "<div class='game-row'>";
-            for ($x=$avatar->x - floor(MAP_SIZE/2); $x<=$avatar->x + floor(MAP_SIZE/2); $x++){
-                $map_type=0;
-                foreach($db_maps as $db_map){
-                    if ($db_map->x == $x && $db_map->y == $y){
-                        $map_type = $db_map->type;
-                    }
-                }
-
-
-                echo "<div class='tile " . $tyle_types[$map_type] . "'
-                  title='(" . $avatar->x . ", " . $avatar->y . ") ";
-                  if ($x == $avatar->x && $y == $avatar->y){
-                      echo " Player here";
-                  }
-                  echo "'>";
-                  if ($x == $avatar->x && $y == $avatar->y && $map_type!=3){
-                    echo "O";
-                  }
-
-
-                echo "</div>";
-                //echo "<div class='tile " . $tyle_types[$map[$x][$y]] . "'>" . $map[$x][$y] . "</div>";
-            }
-            echo "</div>";
-        }
-    echo "<div class='game-row'>" . Game::clock() . " Coordinates: (" . $avatar->x . ", " . $avatar->y . ")</div>";
+        $tile_types = ["void", "water", "land", "docks", "tree"];
+        return view("Avatar.map", [
+            "db_maps"=>$db_maps,
+            "tile_types"=>$tile_types,
+            "avatar"=>$avatar,
+            "activity"=>$activity,
+        ]);
     }
 }

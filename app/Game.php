@@ -54,9 +54,9 @@ class Game extends Model
             }
 
             if ($activity->activity_type_id==ActivityType::SLEEP){
-                $num_of_hours_sleeping  =floor((time()-strtotime($activity->started_at))/150);
+                $num_of_hours_sleeping = Avatar::fetch_hours_of_sleep($activity);
                 if ($num_of_hours_sleeping!=$avatar->sleep){
-                    Avatar::increase_sleep($avatar->id, $num_of_hours_sleeping);
+                    Avatar::increase_sleep($activity);
                     echo "Avatar #" . $avatar->id . " has been sleeping for " . $avatar->sleep . " hours. \n";
                 }
             } else if ($activity->activity_type_id==ActivityType::WANDER){

@@ -18,7 +18,12 @@ class Avatar extends Model
 			$map_type = Map::fetch_type($avatar->x, $avatar->y);
 		 	return $map_type!=3;
 	}
-	public static function increase_sleep($avatar_id, $num_of_hours_sleeping){
+	public static function fetch_hours_of_sleep($activity){
+			$num_of_hours_sleeping  =floor((time()-strtotime($activity->started_at))/150);
+			$sleep_modifier = Avatar::fetch_sleep_modifier($activity->avatar_id);
+			return $num_of_hours_sleeping*$sleep_modifier;
+	}
+	public static function fetch_sleep_modifier($avatar_id){
 			$avatar = Avatar::find($avatar_id);
 			$are_they_outside = Avatar::are_they_outside($avatar_id);
 			$are_they_in_bed = !(($avatar->bed_x==null && $avatar->bed_y==null )
@@ -27,15 +32,28 @@ class Avatar extends Model
 			if ($are_they_outside){
 					$sleep_modifier=.5;
 			}
-
-			$avatar->sleep += ($num_of_hours_sleeping - $avatar->sleep)*$sleep_modifier;
-			$avatar->save();
-
+			return $sleep_modifier;
 	}
 	public static function change_age($avatar_id, $new_age){
 			$avatar = Avatar::find($avatar_id);
 			$avatar->age = $new_age;
 			$avatar->save();
+	}
+	public static function increase_sleep($activity){
+			$avatar = Avatar::find($activity->avatar_id);
+			$avatar->sleep = Avatar::fetch_hours_of_sleep($activity);
+			$avatar->save();
+
+	}
+	public static function lose_exhaustion($avatar_id){
+			$avatar = Avatar::find($avatar_id);
+			$avatar->exhausted = false;
+			$avatar->save();
+	}
+	public static function lose_tiredness($avatar_id){
+		$avatar = Avatar::find($avatar_id);
+		$avatar->tired = false;
+		$avatar->save();
 	}
 	public static function make_exhausted($avatar_id){
 			Avatar::lose_tiredness($avatar_id);
@@ -48,16 +66,8 @@ class Avatar extends Model
 		$avatar->tired=true;
 		$avatar->save();
 	}
-	public static function lose_tiredness($avatar_id){
-		$avatar = Avatar::find($avatar_id);
-		$avatar->tired = false;
-		$avatar->save();
-	}
-	public static function lose_exhaustion($avatar_id){
-			$avatar = Avatar::find($avatar_id);
-			$avatar->exhausted = false;
-			$avatar->save();
-	}
+
+
 	public static function wander($avatar_id){
 			$avatar = Avatar::find($avatar_id);
 			$meter=0;

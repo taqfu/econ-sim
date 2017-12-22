@@ -74,8 +74,15 @@ class AvatarController extends Controller
      */
     public function show($id)
     {
-
-        return view("Avatar.show", ["id"=>$id]);
+        $activity = Activity::fetch_current($id);
+        $avatar=Avatar::find($id);
+        $map = Map::fetch_player_map($avatar->x, $avatar->y);
+        return view("Avatar.show", [
+          "id"=>$id,
+          "map"=>$map,
+          "avatar"=>$avatar,
+          "activity"=>$activity,
+        ]);
     }
 
     /**
@@ -112,21 +119,5 @@ class AvatarController extends Controller
         //
     }
 
-    public function map ($id){
-        $map_type = NULL;
-        $avatar = Avatar::find($id);
-        $activity = Activity::fetch_current($avatar->id);
-        $map_min_x = $avatar->x - floor(Avatar::MAP_SIZE/2) >= 0 ? $avatar->x - floor(Avatar::MAP_SIZE/2) : 0;
-        $map_max_x = $avatar->x + floor(Avatar::MAP_SIZE/2) > Map::MAX_X ? Map::MAX_X : $avatar->x + floor(Avatar::MAP_SIZE/2);
-        $map_min_y = $avatar->y - floor(Avatar::MAP_SIZE/2) >= 0 ? $avatar->y - floor(Avatar::MAP_SIZE/2) : 0;
-        $map_max_y = $avatar->y + floor(Avatar::MAP_SIZE/2) > Map::MAX_Y ? Map::MAX_Y : $avatar->y + floor(Avatar::MAP_SIZE/2);
-        $db_maps = Map::where('x', ">=", $map_min_x)->where("x", "<=", $map_max_x)->where("y", ">=", $map_min_y)->where("y", "<=", $map_max_y)->orderBy("y")->orderBy("x")->get();
-        $tile_types = ["void", "water", "land", "docks", "tree"];
-        return view("Avatar.map", [
-            "db_maps"=>$db_maps,
-            "tile_types"=>$tile_types,
-            "avatar"=>$avatar,
-            "activity"=>$activity,
-        ]);
-    }
+
 }

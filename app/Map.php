@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Map extends Model
 {
+    const MAP_SIZE=20; // INCREASING THIS WILL INCREASE MAP LOAD TIME
     CONST MAX_X = 100;
     CONST MAX_Y = 100;
     CONST TREE_PERCENT = .5;
+    CONST TILE_TYPES = ["void", "water", "land", "docks", "tree"];
 
     public static function fetch_type($x, $y){
         $map = Map::where('x', $x)->where('y', $y)->first();
@@ -85,5 +87,39 @@ class Map extends Model
             }
         }
         return $map;
+    }
+    public static function fetch_player_map($x_coord, $y_coord){
+        $string="";
+        $map_min_x = $x_coord - floor(Map::MAP_SIZE/2) >= 0 ? $x_coord - floor(Map::MAP_SIZE/2) : 0;
+        $map_max_x = $x_coord + floor(Map::MAP_SIZE/2) > Map::MAX_X ? Map::MAX_X : $x_coord + floor(Map::MAP_SIZE/2);
+        $map_min_y = $y_coord - floor(Map::MAP_SIZE/2) >= 0 ? $y_coord - floor(Map::MAP_SIZE/2) : 0;
+        $map_max_y = $y_coord + floor(Map::MAP_SIZE/2) > Map::MAX_Y ? Map::MAX_Y : $y_coord + floor(Map::MAP_SIZE/2);
+        $avatars = Avatar::where('x', ">=", $map_min_x)->where("x", "<=", $map_max_x)->where("y", ">=", $map_min_y)->where("y", "<=", $map_max_y)->orderBy("y")->orderBy("x")->get();
+        for ($y=$y_coord - floor(Map::MAP_SIZE/2); $y<=$y_coord + floor(Map::MAP_SIZE/2); $y++){
+              $string .= "<div class='game-row'>";
+            for ($x=$x_coord - floor(Map::MAP_SIZE/2); $x<=$x_coord + floor(Map::MAP_SIZE/2); $x++){
+                $map_type=Map::fetch_type($x, $y);
+                //$map_type=null;
+                if ($map_type==null){
+                    $map_type = 0;
+                }
+                $string .=  "<div class='tile " . MAP::TILE_TYPES[$map_type] . "'
+                  title='(" . $x . ", " . $y . ") ";
+                  foreach ($avatars as $avatar){
+                      if ($x == $avatar->x && $y == $avatar->y){
+                          $string .=  $avatar->name;
+                      }
+                  }
+                  $string .=  "'>";
+                  foreach ($avatars as $avatar){
+                      if ($x == $avatar->x && $y == $avatar->y && $map_type!=3){
+                        $string .=  "O";
+                      }
+                  }
+                $string .=  "</div>";
+            }
+            $string .=  "</div>";
+        }
+        return $string;
     }
 }

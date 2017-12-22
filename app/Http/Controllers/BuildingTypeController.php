@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Auth;
+use App\BuildingType;
 use Illuminate\Http\Request;
 
 class BuildingTypeController extends Controller
@@ -23,7 +24,8 @@ class BuildingTypeController extends Controller
      */
     public function create()
     {
-        //
+      $building_types = BuildingType::get();
+      return view('BuildingType.create', ["building_types"=>$building_types]);
     }
 
     /**
@@ -34,7 +36,20 @@ class BuildingTypeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if (Auth::guest()){
+            return "Please leave and don't come back";
+        }
+
+        if (Auth::user()->id!=1){
+            return "You are not an Administrator.";
+        }
+
+        $building_type = new BuildingType;
+        $building_type->name = $request->BuildingTypeName;
+        $building_type->length = $request->length;
+        $building_type->width = $request->width;
+        $building_type->save();
+        return back();
     }
 
     /**

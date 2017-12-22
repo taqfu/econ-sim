@@ -2,7 +2,7 @@
     use App\Activity;
     use App\Avatar;
     use App\Game;
-
+    use App\Map;
 ?>
 
 <div id='status' class='game-row'>
@@ -33,7 +33,7 @@ for ($y=$avatar->y - floor(Avatar::MAP_SIZE/2); $y<=$avatar->y + floor(Avatar::M
         }
 
 
-        echo "<div class='tile " . $tile_types[$map_type] . "'
+        echo "<div class='tile " . MAP::TILE_TYPES[$map_type] . "'
           title='(" . $x . ", " . $y . ") ";
           if ($x == $avatar->x && $y == $avatar->y){
               echo " Player here";

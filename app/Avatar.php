@@ -10,7 +10,6 @@ class Avatar extends Model
 	const AVG_CAL_REQ = 2500;
 	const AVG_SLEEP_REQ = 8;
 	const AVG_DAYS_TO_STARVE=24;
-	const MAP_SIZE=25;
 	const SEX = ["invalid", "XY", "XX"];
 	public static function are_they_outside($avatar_id){
 			$avatar = Avatar::find($avatar_id);

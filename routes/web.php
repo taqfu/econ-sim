@@ -16,10 +16,13 @@ Route::get('/', function () {
 });
 
 Auth::routes();
+
 Route::get('/home', 'HomeController@index')->name('home');
-Route::get('a/{id}/map', 'AvatarController@map');
+Route::get('/map/{x}/{y}', 'MapController@show');
 Route::resource('a', 'AvatarController');
 Route::resource('map', 'MapController');
 Route::resource('schedule', 'ScheduleController');
 Route::resource('activity', "ActivityController");
 Route::resource('ActivityType', "ActivityTypeController");
+Route::resource('building', 'BuildingController');
+Route::resource('BuildingType', 'BuildingTypeController');

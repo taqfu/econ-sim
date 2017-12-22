@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Auth;
+use App\Avatar;
 use App\Map;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,8 @@ class MapController extends Controller
      */
     public function index()
     {
-        //
+      //  $db_maps = Map::get();
+      //  return view("Map.index", ["db_maps"=>$db_maps]);
     }
 
     /**
@@ -60,9 +62,14 @@ class MapController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($x, $y)
     {
-        //
+
+        $map = Map::get_map($x, $y);
+        return view("Map.show", [
+            "map"=>$map,
+        ]);
+
     }
 
     /**
@@ -98,4 +105,5 @@ class MapController extends Controller
     {
         //
     }
+
 }

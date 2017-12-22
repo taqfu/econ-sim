@@ -25,9 +25,10 @@
     width:100px;
 }
 .tile{
-   width:25px;
-   height:25px;
+   width:24px;
+   height:24px;
    float:left;
+   font-size:20px;
 
    text-align:center;
    vertical-align:center;

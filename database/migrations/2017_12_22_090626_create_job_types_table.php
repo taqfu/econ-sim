@@ -16,6 +16,10 @@ class CreateJobTypesTable extends Migration
         Schema::create('job_types', function (Blueprint $table) {
             $table->increments('id');
             $table->timestamps();
+            $table->boolean('computer_job');
+            $table->unsignedInteger('building_type_id');
+            $table->char('name', 255);
+            $table->string('description');
         });
     }
 

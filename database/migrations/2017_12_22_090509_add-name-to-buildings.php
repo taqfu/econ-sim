@@ -14,7 +14,7 @@ class AddNameToBuildings extends Migration
     public function up()
     {
         Schema::table('buildings', function (Blueprint $table) {
-            //
+            $table->char('name', 255);
         });
     }
 

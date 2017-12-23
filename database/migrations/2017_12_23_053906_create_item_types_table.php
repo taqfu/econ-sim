@@ -16,6 +16,12 @@ class CreateItemTypesTable extends Migration
         Schema::create('item_types', function (Blueprint $table) {
             $table->increments('id');
             $table->timestamps();
+            $table->char('name', 255);
+            $table->char('category', 255);
+            $table->char('unit_of_measurement', 255);
+            $table->float('cubic_meters');
+            $table->float('kilograms');
+
         });
     }
 

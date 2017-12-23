@@ -17,7 +17,9 @@ use App\Game;
         <div><a href="{{route('building.show', ['id'=>$building->id])}}"> {{$building->name}}</a></div>
 
     @endforeach
+    @if (count($jobs))
     <div>Job Openings</div>
+    @endif
     @foreach ($jobs as $job)
         <div>
           <a href="{{route('job.show', ['id'=>$job->id])}}">

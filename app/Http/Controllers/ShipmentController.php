@@ -1,11 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-use Auth;
-use App\ItemType;
+
 use Illuminate\Http\Request;
 
-class ItemTypeController extends Controller
+class ShipmentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -24,10 +23,7 @@ class ItemTypeController extends Controller
      */
     public function create()
     {
-        $item_types = ItemType::get();
-        return view('ItemType.create', [
-          "item_types"=>$item_types,
-        ]);
+        //
     }
 
     /**
@@ -38,22 +34,7 @@ class ItemTypeController extends Controller
      */
     public function store(Request $request)
     {
-        if (Auth::guest()){
-            return "Please leave and don't come back";
-        }
-
-        if (Auth::user()->id!=1){
-            return "You are not an Administrator.";
-        }
-        $item_type = new ItemType;
-        $item_type->name = $request->ItemTypeName;
-        $item_type->category = $request->category;
-        $item_type->unit_of_measurement = $request->unitOfMeasurement;
-        $item_type->cubic_meters = $request->cubicMeters;
-        $item_type->kilograms = $request->kilograms;
-        $item_type->inventory_stackable = !$request->inventoryStackable=="false";
-        $item_type->save();
-        return back();
+        //
     }
 
     /**

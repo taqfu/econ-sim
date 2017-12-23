@@ -102,7 +102,7 @@ class Game extends Model
         $ig_hour = floor(($minute + (round(($second+1)/60, 2)))/2.5);
         $ig_minute = floor((($minute + (round(($second+1)/60, 2)))/2.5 - floor(($minute + (round(($second+1)/60, 2)))/2.5))*60);
         $ig_day = $hour;
-        $ig_week = round($ig_day/6);
+        $ig_week = ceil($ig_day/6);
 
         if ($ig_hour < 10){
            $ig_hour = "0" . $ig_hour;

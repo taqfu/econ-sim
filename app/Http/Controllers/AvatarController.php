@@ -6,6 +6,8 @@ use Auth;
 use App\Activity;
 
 use App\Avatar;
+use App\Building;
+use App\Job;
 use App\Game;
 use App\Map;
 
@@ -77,11 +79,15 @@ class AvatarController extends Controller
         $activity = Activity::fetch_current($id);
         $avatar=Avatar::find($id);
         $map = Map::fetch_player_map($avatar->x, $avatar->y);
+        $jobs = Job::whereNull('employee_avatar_id')->get();
+        $buildings = Building::get();
         return view("Avatar.show", [
           "id"=>$id,
-          "map"=>$map,
           "avatar"=>$avatar,
           "activity"=>$activity,
+          "buildings"=>$buildings,
+          "jobs"=>$jobs,
+          "map"=>$map,
         ]);
     }
 

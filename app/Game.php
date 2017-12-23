@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Game extends Model
 {
+    CONST THE_COMPANY = "United Public Capital";
     const NUM_OF_METERS_PER_RL_SECOND = 16;
     public static function run(){
         $avatars = Avatar::get();
@@ -48,7 +49,7 @@ class Game extends Model
                     Activity::end_last($avatar->id);
                     Activity::sleep($avatar->id);
                 } else if ($activity->activity_type_id==ActivityType::SLEEP && $avatar->sleep>=$avatar->sleep_req){
-                    echo "Avatar #" . $avatar->id . " is no longer exhausted after sleeping " . $num_of_hours_sleeping . " hours.\n";
+                    echo "Avatar #" . $avatar->id . " is no longer exhausted after sleeping " . Avatar::fetch_hours_of_sleep($activity) . " hours.\n";
                     Avatar::lose_exhaustion($avatar->id);
                 }
             }

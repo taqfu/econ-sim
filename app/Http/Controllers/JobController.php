@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Auth;
+use App\Avatar;
+use App\Job;
 use Illuminate\Http\Request;
 
 class JobController extends Controller
@@ -45,7 +47,13 @@ class JobController extends Controller
      */
     public function show($id)
     {
-        //
+        $job = Job::find($id);
+        $avatars = Avatar::where('user_id', Auth::user()->id)->get();
+
+        return view('Job.show', [
+            "avatars"=>$avatars,
+            "job"=>$job,
+        ]);
     }
 
     /**
@@ -80,5 +88,27 @@ class JobController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function apply($id, Request $request){
+        if (Auth::guest()){
+            echo "You need to be logged in to do this.";
+        }
+        $avatars = Avatar::where('user_id', Auth::user()->id)->get();
+        if (count($avatars)==0){
+            echo "You don't have any avatars.";
+        }
+        $job = Job::find($id);
+        if ($job->type->computer_job){ //EVENTUALLY HAVE COMPUTER WAIT ONE IN-GAME DAY AND PICK RANDOM OR BEST APPLICATION
+            $job->employee_avatar_id = $request->avatarID;
+            $job->save();
+            $avatar= Avatar::find($request->avatarID);
+            $avatar->job_id = $job->id;
+            $avatar->save();
+        } else {
+            //CREATE APPLICATIONS FOR EMPLOYERS TO PERUSE
+        }
+        return back();
+
     }
 }

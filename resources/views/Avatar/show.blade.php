@@ -11,7 +11,21 @@ use App\Game;
 @section('content')
 <div class='container'>
 <div class='row'>
-<div class='col-md-2'></div>
+<div class='col-md-2'>
+    <div>Buildings</div>
+    @foreach ($buildings as $building)
+        <div><a href="{{route('building.show', ['id'=>$building->id])}}"> {{$building->name}}</a></div>
+
+    @endforeach
+    <div>Job Openings</div>
+    @foreach ($jobs as $job)
+        <div>
+          <a href="{{route('job.show', ['id'=>$job->id])}}">
+              {{$job->type->name}}
+          </a> @
+          <a href="{{route('building.show', ['id'=>$job->building->id])}}"> {{$job->building->name}}</a></div>
+    @endforeach
+</div>
 <div class='col-md-8'>
     <div>
       Name:{{$avatar->name}}

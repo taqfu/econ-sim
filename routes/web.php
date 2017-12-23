@@ -29,3 +29,5 @@ Route::resource('building', 'BuildingController');
 Route::resource('BuildingType', 'BuildingTypeController');
 Route::resource('JobType', 'JobTypeController');
 Route::resource('job', 'JobController');
+Route::resource('room', 'RoomController');
+Route::resource('RoomType', 'RoomTypeController');

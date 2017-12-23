@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Building;
 use App\Job;
 use App\Map;
+use App\Room;
 use Illuminate\Http\Request;
 
 class BuildingController extends Controller
@@ -51,10 +52,12 @@ class BuildingController extends Controller
         $jobs = Job::where('building_id', $id)->get();
         $center_pos = Building::fetch_center_pos($id);
         $map = Map::fetch_player_map($center_pos["x"], $center_pos["y"]);
+        $rooms = Room::where('building_id', $id)->get();
         return vieW('Building.show',[
             "map"=>$map,
             "building"=>$building,
-            "jobs"=>$jobs
+            "jobs"=>$jobs,
+            "rooms"=>$rooms
         ]);
     }
 

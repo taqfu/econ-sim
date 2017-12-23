@@ -18,11 +18,12 @@ class CreateRoomsTable extends Migration
             $table->timestamps();
             $table->char('name', 255);
             $table->unsignedInteger('building_id');
+            $table->unsignedInteger('room_type_id');
             $table->unsignedInteger('current_storage');
             $table->unsignedInteger('max_storage');
-            $table->boolean('public')->default('false');
-            $table->boolean('enclosed')->default('true');
-            $table->boolean('sleep')->default('false');
+            $table->boolean('public')->default(false);
+            $table->boolean('enclosed')->default(true);
+            $table->boolean('sleep')->default(false);
 
         });
     }

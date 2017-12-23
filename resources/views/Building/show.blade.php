@@ -7,6 +7,12 @@
 <div class='container'>
 <div class='row'>
 <div class='col-md-2'>
+      <div>Rooms</div>
+      <ul>
+      @foreach ($rooms as $room)
+        <li>{{$room->name}}</li> ({{$room->current_storage}}/{{$room->max_storage}}m3)
+      @endforeach
+      </ul>
       <div>Jobs</div>
       @foreach ($jobs as $job)
           <a href="{{route('job.show', ['id'=>$job->id])}}">

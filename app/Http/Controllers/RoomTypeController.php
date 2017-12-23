@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Auth;
+use App\RoomType;
+use App\BuildingType;
 use Illuminate\Http\Request;
 
 class RoomTypeController extends Controller
@@ -23,7 +25,13 @@ class RoomTypeController extends Controller
      */
     public function create()
     {
-        //
+      $room_types = RoomType::get();
+      $building_types = BuildingType::get();
+
+      return view('RoomType.create', [
+        "room_types"=>$room_types,
+        "building_types"=>$building_types,
+      ]);
     }
 
     /**
@@ -34,7 +42,23 @@ class RoomTypeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if (Auth::guest()){
+            return "Please leave and don't come back";
+        }
+
+        if (Auth::user()->id!=1){
+            return "You are not an Administrator.";
+        }
+        $room_type = new RoomType;
+        $room_type->name = $request->RoomTypeName;
+        $room_type->building_type_id = $request->BuildingTypeID;
+        $room_type->max_storage = $request->maxStorage;
+        $room_type->public = $request->public=="true";
+        $room_type->enclosed = $request->enclosed=="true";
+        $room_type->sleep = $request->sleep=="true";
+        $room_type->save();
+        return back();
+
     }
 
     /**

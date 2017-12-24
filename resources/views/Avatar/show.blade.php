@@ -4,6 +4,7 @@ header("Refresh:2");
 use App\Avatar;
 use App\Activity;
 use App\Game;
+use App\Schedule;
 
 ?>
 @extends('layouts.app')
@@ -38,6 +39,8 @@ use App\Game;
     <div>
       Sex:{{Avatar::SEX[$avatar->sex]}}
       Age:{{$avatar->age}}
+      Schedule: {{Schedule::CAPTION[Schedule::fetch_type($avatar->id, Game::fetch_hour())]}}
+    </div><div>
       Health:{{$avatar->health}}%
       Food:{{$avatar->calories / $avatar->calories_req * 100}}%
       Sleep:{{round($avatar->sleep / $avatar->sleep_req, 1) * 100}}%
@@ -47,7 +50,7 @@ use App\Game;
           <span class='text-danger'>Tired</span>
       @endif
 
-      {{ucfirst($activity->type->name . "ing")}} {{Activity::fetch_number_of_hours($activity)}}h
+      {{ucfirst($activity->type->name )}} {{Activity::fetch_number_of_hours($activity)}}h
     </div>
 
     <div id='map' class='clearfix'>
@@ -59,7 +62,11 @@ use App\Game;
       Coordinates: ({{$avatar->x}}, {{$avatar->y}})
     </div>
 </div>
-<div class='col-md-2'></div>
+<div class='col-md-2'>
+    <div>
+        <a href="{{route('schedule.index')}}">Schedule</a>
+    </div>
+</div>
 </div>
 </div>
 @endsection

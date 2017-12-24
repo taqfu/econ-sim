@@ -26,13 +26,24 @@ class Activity extends Model
     }
     public static function end_last($avatar_id){
         $activity = Activity::fetch_current($avatar_id);
-        $activity->ended_at = date("Y-m-d H:i:s");
-        $activity->save();
+        if ($activity!=null){
+            $activity->ended_at = date("Y-m-d H:i:s");
+            $activity->save();
+        }
+    }
+    public static function head_to_bed($avatar_id){
+      Activity::end_last($avatar_id);
 
+      $activity = new Activity;
+      $activity->activity_type_id = ActivityType::HEAD_TO_BED;
+      $activity->avatar_id = $avatar_id;
+      $activity->started_at = date("Y-m-d H:i:s");
+      $activity->save();
     }
     public static function sleep($avatar_id){
+      Activity::end_last($avatar_id);
       $activity = new Activity;
-      $activity->activity_type_id = 3;
+      $activity->activity_type_id = ActivityType::SLEEP;
       $activity->avatar_id = $avatar_id;
       $activity->started_at = date("Y-m-d H:i:s");
       $activity->save();
@@ -41,8 +52,9 @@ class Activity extends Model
       $avatar->save();
     }
     public static function wander($avatar_id){
+        Activity::end_last($avatar_id);
         $activity = new Activity;
-        $activity->activity_type_id = 2;
+        $activity->activity_type_id = ActivityType::WANDER;
         $activity->avatar_id = $avatar_id;
         $activity->started_at = date("Y-m-d H:i:s");
         $activity->save();

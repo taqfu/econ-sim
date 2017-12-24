@@ -15,4 +15,12 @@ class Job extends Model
     public function employee(){
         return $this->hasOne('App\Avatar', 'id', 'employee_avatar_id');
     }
+    public static function fire_employee ($id){
+        $job = Job::find($id);
+        $avatar = Avatar::find($job->employee_avatar_id);
+        $avatar->job_id = null;
+        $avatar->save();
+        $job->fired_at = date("Y-m-d H:i:s");
+        $job->save();
+    }
 }

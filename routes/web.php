@@ -16,7 +16,12 @@ Route::get('/', function () {
 });
 
 Auth::routes();
-
+Route::get('/admin', function (){
+    if (Auth::guest() || (Auth::user() && Auth::user()->id!=1)){
+        return "Nope. Nothing here, bro.";
+    }
+    return view('admin');
+})->name('admin');
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/map/{x}/{y}', 'MapController@show');
 Route::post('job/{id}/apply', 'JobController@apply')->name('job.apply');

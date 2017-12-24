@@ -26,7 +26,9 @@ class Game extends Model
                 Shipment::create_new_shipment($shipment->item_type_id,
                   $shipment->item_type->shipment_per_person, $overseer->employee->id,
                   $week + 1 > 4 ? 1 : $week + 1);
-
+            }
+            if (Schedule::fetch_type($overseer->employee_avatar_id, $hour) != Schedule::WORK){
+                Job::fire_employee($overseer->id);
             }
         }
 
@@ -59,14 +61,11 @@ class Game extends Model
                     }
                 }
 
-            } else if ($avatar->exhausted){
-                if ($activity==null){
+            }
+            if ($avatar->exhausted){
+
+                if ($activity==null || $activity->activity_type_id!=ActivityType::SLEEP){
                     echo "Avatar #" . $avatar->id . " fell asleep from exhaustion.\n";
-                    Activity::sleep($avatar->id);
-                }
-                else if ($activity->activity_type_id!=ActivityType::SLEEP){
-                    echo "Avatar #" . $avatar->id . " is exhausted. Stopping Activity #" . $activity->activity_type_id . " and falling asleep.\n";
-                    Activity::end_last($avatar->id);
                     Activity::sleep($avatar->id);
                 } else if ($activity->activity_type_id==ActivityType::SLEEP && $avatar->sleep>=$avatar->sleep_req){
                     echo "Avatar #" . $avatar->id . " is no longer exhausted after sleeping " . Avatar::fetch_hours_of_sleep($activity) . " hours.\n";
@@ -74,33 +73,42 @@ class Game extends Model
                 }
             }
 
-            if ($activity->activity_type_id==ActivityType::SLEEP){
+            if ($activity!=null && $activity->type->id==ActivityType::SLEEP){
                 $num_of_hours_sleeping = Avatar::fetch_hours_of_sleep($activity);
-                if ($num_of_hours_sleeping!=$avatar->sleep){
+                if (floor($num_of_hours_sleeping)!=$avatar->sleep){
                     Avatar::increase_sleep($activity);
                     echo "Avatar #" . $avatar->id . " has been sleeping for " . $avatar->sleep . " hours. \n";
                 }
-            } else if ($activity->activity_type_id==ActivityType::WANDER){
+            } else if ($activity!=null &&  $activity->type->id==ActivityType::WANDER){
 
                 Avatar::wander($avatar->id);
             }
-            if (!$avatar->exhausted && $schedule_type==0){
-                if ($activity==null){
-                    Activity::sleep($avatar->id);
-                    echo "Going to sleep now";
-                } else if ($activity->activity_type_id!=ActivityType::SLEEP){
-                  echo "Ending activity type #" . $activity->activity_type_id . " and sleeping...\n";
-                  Activity::end_last($avatar->id);
-                  Activity::sleep($avatar->id);
 
+            if (!$avatar->exhausted && $schedule_type==0){
+                $nearest_building_to_sleep = Avatar::fetch_nearest_place_to_sleep($avatar->id);
+                if ($nearest_building_to_sleep!=null){
+                    if (Avatar::are_they_in_the_building($avatar->id, $nearest_building_to_sleep->id)){
+                        echo "Going to sleep inside room\n";
+                        Activity::sleep($avatar->id);
+                    } else {
+                        if ($activity==null || ($activity!=null && $activity->type->id != ActivityType::HEAD_TO_BED)){
+                            Activity::head_to_bed($avatar->id);
+                        }
+                        $new_pos = Building::fetch_center_pos($nearest_building_to_sleep->id);
+                        echo "Heading from (" . $avatar->x . ", " . $avatar->y
+                          . ") to (" . $new_pos['x'] . ", " . $new_pos['y']
+                          . ") to go to sleep\n";
+                        Avatar::move_towards($avatar->id, $new_pos);
+                    }
+
+                } else {
+                    if ($activity->type->id != ActivityType::SLEEP){
+                        Activity::sleep($avatar->id);
+                    }
                 }
-            } else if (!$avatar->exhausted && $schedule_type==1){
-                if ($activity==null){
-                    echo "Going to wander now";
-                    Activity::wander($avatar->id);
-                } else if ($activity->activity_type_id!=2){
-                    echo "Ending activity type #" . $activity->activity_type_id . " and wandering...\n";
-                    Activity::end_last($avatar->id);
+            } else if (!$avatar->exhausted && $schedule_type==1 ){
+                if ($activity->type->id != ActivityType::WANDER){
+                    echo "Wandering \n";
                     Activity::wander($avatar->id);
                 }
             }

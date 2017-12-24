@@ -13,7 +13,7 @@
     <div>Max. Storage (m3):<input type='text' name='maxStorage' /></div>
     <div>Can the owner sleep here? <input type='checkbox' name='sleep' value='true' /></div>
     <div>Is this a public area? <input type='checkbox' name='public' value='true' /> </div>
-    <div>Is this area enclosed? <input type='checkbox' name='enclosed' value='true' checked /> </div>
+    <div>Is this area enclosed? <input type='checkbox' name='walled' value='true' checked /> </div>
 
 
     <input type='submit' value='Create'/>

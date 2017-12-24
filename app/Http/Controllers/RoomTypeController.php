@@ -54,7 +54,7 @@ class RoomTypeController extends Controller
         $room_type->building_type_id = $request->BuildingTypeID;
         $room_type->max_storage = $request->maxStorage;
         $room_type->public = $request->public=="true";
-        $room_type->enclosed = $request->enclosed=="true";
+        $room_type->walled = $request->walled=="true";
         $room_type->sleep = $request->sleep=="true";
         $room_type->save();
         return back();

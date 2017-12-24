@@ -27,7 +27,10 @@ class Game extends Model
                   $shipment->item_type->shipment_per_person, $overseer->employee->id,
                   $week + 1 > 4 ? 1 : $week + 1);
             }
+            $activity = Activity::fetch_current($overseer->employee_avatar_id);
             if (Schedule::fetch_type($overseer->employee_avatar_id, $hour) != Schedule::WORK){
+                Job::fire_employee($overseer->id);
+            } else if ($activity->type->id == ActivityType::SLEEP){
                 Job::fire_employee($overseer->id);
             }
         }
@@ -75,6 +78,7 @@ class Game extends Model
 
             if ($activity!=null && $activity->type->id==ActivityType::SLEEP){
                 $num_of_hours_sleeping = Avatar::fetch_hours_of_sleep($activity);
+                //var_dump(floor($num_of_hours_sleeping), $avatar->sleep);
                 if (floor($num_of_hours_sleeping)!=$avatar->sleep){
                     Avatar::increase_sleep($activity);
                     echo "Avatar #" . $avatar->id . " has been sleeping for " . $avatar->sleep . " hours. \n";

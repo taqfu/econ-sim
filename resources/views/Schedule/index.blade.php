@@ -39,11 +39,21 @@
                 />
             </td>
         @endfor
-      </tr><tr><td>Work</td>
+      </tr><tr><td>
+          Work
+          @if ($avatar->job_id!=null)
+              (Shift:{{$avatar->job->starts_on_hour}}:00-{{$avatar->job->ends_on_hour}}:00)
+          @endif
+      </td>
         @for($hour=0; $hour<24; $hour++)
+        <?php $schedule_type = Schedule::fetch_type($avatar->id, $hour); ?>
+
             <td class='schedule-cell
-            @if (Schedule::fetch_type($avatar->id, $hour)==2)
+            @if ($schedule_type==2)
                 info
+            @elseif ($schedule_type!=2 && ($hour>=$avatar->job->starts_on_hour && $hour<=$avatar->job->ends_on_hour))
+                danger
+
             @endif
             '>
                 <input type='radio' name='{{$hour}}' value="2"

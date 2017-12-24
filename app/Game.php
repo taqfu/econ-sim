@@ -10,6 +10,26 @@ class Game extends Model
     CONST THE_COMPANY = "United Public Capital";
     const NUM_OF_METERS_PER_RL_SECOND = 16;
     public static function run(){
+        $week = Game::fetch_week();
+        $hour = Game::fetch_hour();
+        $shipments = Shipment::whereNull('delivered_at')->where('week', $week)->get();
+        if (Shipment::fetch_num_of_days_until_shipment()==0
+          && count($shipments)>0 && $hour>=9 && $hour<=17){
+            $overseer = Job::where('job_type_id', JobType::OVERSEER)->whereNull('fired_at')->whereNull('promoted_at')->first();
+            Room::clear_ship(Room::SHIP);
+
+            foreach($shipments as $shipment){
+                $shipment->delivered_at = date("Y-m-d H:i:s");
+                $shipment->save();
+                Item::spawn_in_room($shipment->item_type_id,
+                  $shipment->quantity, Room::SHIP);
+                Shipment::create_new_shipment($shipment->item_type_id,
+                  $shipment->item_type->shipment_per_person, $overseer->employee->id,
+                  $week + 1 > 4 ? 1 : $week + 1);
+
+            }
+        }
+
         $avatars = Avatar::get();
         foreach ($avatars as $avatar){
             $age_ig = 18+floor((time()-strtotime($avatar->created_at))/(86400*12));
@@ -99,7 +119,7 @@ class Game extends Model
 
         //var_dump ($minute, (round(($second+1)/60, 2)));
         $ig_month = date("z") % 12;
-        $ig_hour = floor(($minute + (round(($second+1)/60, 2)))/2.5);
+        $ig_hour = Game::fetch_hour();
         $ig_minute = floor((($minute + (round(($second+1)/60, 2)))/2.5 - floor(($minute + (round(($second+1)/60, 2)))/2.5))*60);
         $ig_day = $hour;
         $ig_week = ceil($ig_day/6);
@@ -113,5 +133,15 @@ class Game extends Model
         $ig_year = floor (date("z") / 12);
 
         return $month_names[$ig_month] . " " . $ig_day . ", " . $ig_year . "EC  " . $ig_hour . ":" . $ig_minute  . " Week #" . $ig_week ;
+    }
+
+    public static function fetch_week(){
+        return ceil(date("G")/6);
+
+    }
+    public static function fetch_hour(){
+        $minute = date("i");
+        $second = date("s");
+        return floor(($minute + (round(($second+1)/60, 2)))/2.5);
     }
 }

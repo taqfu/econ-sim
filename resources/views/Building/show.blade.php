@@ -10,7 +10,8 @@
       <div>Rooms</div>
       <ul>
       @foreach ($rooms as $room)
-        <li>{{$room->name}}</li> ({{$room->current_storage}}/{{$room->max_storage}}m3)
+        <li>
+            <a href="{{route('room.show', ['id'=>$room->id])}}">{{$room->name}}</a></li> ({{$room->current_storage}}/{{$room->max_storage}}m3)
       @endforeach
       </ul>
       <div>Jobs</div>
@@ -39,7 +40,11 @@
     <div id='map' class='clearfix'>
         {!!$map!!}
     </div>
-
+    <div>
+        <form method='get' action="{{route('shipment.create')}}">
+            <input type='submit' class='btn btn-primary btn-block' value='Order A Delivery' />
+        </form>
+    </div>
 
 </div>
 <div class='col-md-2'></div>

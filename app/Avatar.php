@@ -26,6 +26,9 @@ class Avatar extends Model
 			$sleep_modifier = Avatar::fetch_sleep_modifier($activity->avatar_id);
 			return $num_of_hours_sleeping*$sleep_modifier;
 	}
+	public static function fetch_population(){
+			return count(Avatar::whereNull('died_at')->get());
+	}
 	public static function fetch_sleep_modifier($avatar_id){
 			$avatar = Avatar::find($avatar_id);
 			$are_they_outside = Avatar::are_they_outside($avatar_id);
@@ -84,6 +87,7 @@ class Avatar extends Model
 					$move_y = rand (-1, 1);
 					$new_player_pos = ["x"=>$player_pos["x"]+$move_x, "y"=>$player_pos["y"] + $move_y];
 					$map = Map::where("x", $new_player_pos["x"])->where("y", $new_player_pos["y"])->first();
+					/*
 					var_dump($new_player_pos, $new_player_pos["x"]>=0, $new_player_pos["x"]< Map :: MAX_X,
 						$new_player_pos["y"]>=0, $new_player_pos["y"]< Map :: MAX_Y,
 						sizeof($map)>0);
@@ -92,10 +96,11 @@ class Avatar extends Model
 						} else {
 								echo "map type is null\n";
 						}
+						*/
 					if ($new_player_pos["x"]>=0 && $new_player_pos["x"]< Map :: MAX_X
 					&& $new_player_pos["y"]>=0 && $new_player_pos["y"]< Map :: MAX_Y
 					&& sizeof($map)>0 && $map->type!=1){
-							echo $meter . " -  (" . $new_player_pos["x"] . ", " . $new_player_pos["y"] . ") - " . $map->type . "\n";
+							//echo $meter . " -  (" . $new_player_pos["x"] . ", " . $new_player_pos["y"] . ") - " . $map->type . "\n";
 							$meter++;
 							$player_pos = $new_player_pos;
 

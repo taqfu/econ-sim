@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Room;
+use App\Item;
 use Illuminate\Http\Request;
 
 class RoomController extends Controller
@@ -45,7 +47,13 @@ class RoomController extends Controller
      */
     public function show($id)
     {
-        //
+      Room::update_storage($id);
+      $room = Room::find($id);
+      $items = Item::where('room_id', $id)->get();
+      return view('Room.show',[
+          "room"=>$room,
+          "items"=>$items
+      ]);
     }
 
     /**

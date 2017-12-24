@@ -29,8 +29,13 @@ use App\Game;
     @endforeach
 </div>
 <div class='col-md-8'>
+    <h1 class='text-center'>{{$avatar->name}}</h1>
+    <h3 class='text-center'>
+      <a href="{{route('job.show', ['id'=>$avatar->job->id])}}">{{$avatar->job->type->name}}</a>
+      @
+      <a href="{{route('building.show', ['id'=>$avatar->job->building->id])}}">{{$avatar->job->building->name}}</a>
+    </h3>
     <div>
-      Name:{{$avatar->name}}
       Sex:{{Avatar::SEX[$avatar->sex]}}
       Age:{{$avatar->age}}
       Health:{{$avatar->health}}%

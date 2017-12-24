@@ -32,4 +32,4 @@ Route::resource('map', 'MapController');
 Route::resource('room', 'RoomController');
 Route::resource('RoomType', 'RoomTypeController');
 Route::resource('schedule', 'ScheduleController');
-Route::resource('shipment', 'ShipmentTypeController');
+Route::resource('shipment', 'ShipmentController');

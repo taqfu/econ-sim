@@ -101,6 +101,7 @@ class JobController extends Controller
         $job = Job::find($id);
         if ($job->type->computer_job){ //EVENTUALLY HAVE COMPUTER WAIT ONE IN-GAME DAY AND PICK RANDOM OR BEST APPLICATION
             $job->employee_avatar_id = $request->avatarID;
+            $job->hired_at = date("Y-m-d H:i:s");
             $job->save();
             $avatar= Avatar::find($request->avatarID);
             $avatar->job_id = $job->id;

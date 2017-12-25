@@ -10,6 +10,7 @@ class Avatar extends Model
 		const AVG_CAL_REQ = 2500;
 		const AVG_SLEEP_REQ = 8;
 		const AVG_DAYS_TO_STARVE=24;
+		const INVENTORY_SIZE_LIMIT = 1;
 		const SEX = ["invalid", "XY", "XX"];
 		public function job(){
 				return $this->hasOne('App\Job', 'id', 'job_id');
@@ -18,8 +19,10 @@ class Avatar extends Model
 		public static function are_they_in_the_building($id, $building_id){
 			$avatar = Avatar::find($id);
 			$building = Building::find($building_id);
-			return ($building->begin_x >= $avatar->x && $building->end_x <= $avatar->x
-				&& $building->begin_y >= $avatar->y && $building->end_y <= $avatar->y);
+
+
+			return ($building->begin_x <= $avatar->x && $building->end_x >= $avatar->x
+				&& $building->begin_y <= $avatar->y && $building->end_y >= $avatar->y);
 		}
 		public static function are_they_outside($avatar_id){
 				$avatar = Avatar::find($avatar_id);
@@ -139,7 +142,65 @@ class Avatar extends Model
 				$avatar_db->save();
 		}
 
+		public static function unload_ship($avatar_id){
+				$avatar = Avatar::find($avatar_id);
+				$items_in_inventory = Item::where('room_id', Room::STORAGE_ROOM)
+					->where('inventory_avatar_id', $avatar_id)->where('hauling', true)
+					->get();
+				$storage_room = Room::find(Room::STORAGE_ROOM);
+				foreach ($items_in_inventory as $item_in_inventory){
+						if ($item_in_inventory->quantity
+							* $item_in_inventory->type->cubic_meters
+							<= $storage_room->max_storage - $storage_room->current_storage){
+								$item_in_inventory->inventory_avatar_id = null;
+								$item_in_inventory->hauling = false;
+								$item_in_inventory->save();
+								Room::update_storage(Room::STORAGE_ROOM);
+						}
+				}
+				if (count($items_in_inventory)==0){
+						$items_in_ship = Item::where('room_id', Room::SHIP)
+							->whereNull('inventory_avatar_id' )->get();
+						foreach ($items_in_ship as $item_in_ship){
+								if ($item_in_ship->quantity * $item_in_ship->type->cubic_meters
+									<= Avatar::INVENTORY_SIZE_LIMIT - $avatar->inventory_size
+									&& $item_in_ship->quantity * $item_in_ship->type->kilograms
+									<= $avatar->inventory_weight_limit - $avatar->inventory_weight){
+										$item_in_ship->inventory_avatar_id = $avatar_id;
+										$item_in_ship->room_id = Room::STORAGE_ROOM;
+										$item_in_ship->hauling = true;
+										$item_in_ship->save();
+								} else {
+										$free_inventory_weight = $avatar->inventory_weight_limit
+											- $avatar->inventory_weight;
+										$free_inventory_size = Avatar::INVENTORY_SIZE_LIMIT
+											- $avatar->inventory_size;
+										$quantity_for_weight = floor ($free_inventory_weight
+											/ $item_in_ship->kilograms);
+										$quantity_for_size = floor($free_inventory_size
+											/ $item_in_ship->cubic_meters);
+										$quantity_used = $quantity_for_weight > $quantity_for_size
+											? $quantity_for_size : $quantity_for_weight;
 
+										$item_in_ship->quantity = $item_in_ship->quantity
+											- $quantity_used;
+										$item_in_ship->save();
+
+										$new_item_in_inventory = new Item;
+										$new_item_in_inventory->quantity = $quantity_used;
+										$new_item_in_inventory->item_type_id
+											= $item_in_ship->item_type_id;
+										$new_item_in_inventory->$room_id = Room::STORAGE_ROOM;
+										$new_item_in_inventory->inventory_avatar_id = $avatar_id;
+										$new_item_in_inventory->hauling = true;
+										$new_item_in_inventory->save();
+								}
+								Room::update_storage(Room::SHIP);
+								Avatar::update_inventory($avatar_id);
+						}
+				}
+
+		}
 		public static function wander($avatar_id){
 				$avatar = Avatar::find($avatar_id);
 				$meter=0;
@@ -165,5 +226,25 @@ class Avatar extends Model
 				$avatar_db->y = $new_player_pos["y"];
 				$avatar_db->save();
 		}
+		public static function update_inventory($avatar_id){
+				$total_kilograms = 0;
+				$total_cubic_meters = 0;
+				$avatar = Avatar::find($avatar_id);
+				$items = Item::where('inventory_avatar_id', $avatar_id)->get();
 
+				foreach ($items as $item){
+						$total_kilograms += $item->quantity * $item->type->kilograms;
+						$total_cubic_meters += $item->quantity * $item->type->cubic_meters;
+				}
+				if ($total_kilograms > $avatar->inventory_weight_limit){
+						error_log ("Too much inventory weight for Avatar #" . $avatar->id);
+				}
+				if ($total_cubic_meters > $avatar->inventory_size_limit){
+						error_log ("Too much inventory bulk for Avatar #" . $avatar->id);
+				}
+				$avatar->inventory_weight = $total_kilograms;
+				$avatar->inventory_size = $total_cubic_meters;
+				$avatar->save();
+
+		}
 }

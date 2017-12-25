@@ -31,11 +31,13 @@ use App\Schedule;
 </div>
 <div class='col-md-8'>
     <h1 class='text-center'>{{$avatar->name}}</h1>
+    @if ($avatar->job_id!=null)
     <h3 class='text-center'>
       <a href="{{route('job.show', ['id'=>$avatar->job->id])}}">{{$avatar->job->type->name}}</a>
       @
       <a href="{{route('building.show', ['id'=>$avatar->job->building->id])}}">{{$avatar->job->building->name}}</a>
     </h3>
+    @endif
     <div>
       Sex:{{Avatar::SEX[$avatar->sex]}}
       Age:{{$avatar->age}}

@@ -17,4 +17,5 @@ class Building extends Model
         return $center_pos;
 
     }
+
 }

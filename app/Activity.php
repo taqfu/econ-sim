@@ -31,6 +31,15 @@ class Activity extends Model
             $activity->save();
         }
     }
+    public static function fill_out_paperwork($avatar_id){
+        Activity::end_last($avatar_id);
+
+        $activity = new Activity;
+        $activity->activity_type_id = ActivityType::PAPERWORK;
+        $activity->avatar_id = $avatar_id;
+        $activity->started_at = date("Y-m-d H:i:s");
+        $activity->save();
+    }
     public static function head_to_bed($avatar_id){
       Activity::end_last($avatar_id);
 
@@ -39,6 +48,15 @@ class Activity extends Model
       $activity->avatar_id = $avatar_id;
       $activity->started_at = date("Y-m-d H:i:s");
       $activity->save();
+    }
+    public static function head_to_work($avatar_id){
+        Activity::end_last($avatar_id);
+
+        $activity = new Activity;
+        $activity->activity_type_id = ActivityType::HEAD_TO_WORK;
+        $activity->avatar_id = $avatar_id;
+        $activity->started_at = date("Y-m-d H:i:s");
+        $activity->save();
     }
     public static function sleep($avatar_id){
       Activity::end_last($avatar_id);
@@ -50,6 +68,14 @@ class Activity extends Model
       $avatar = Avatar::find($avatar_id);
       $avatar->sleep = 0;
       $avatar->save();
+    }
+    public static function unload_ship($avatar_id){
+        Activity::end_last($avatar_id);
+        $activity = new Activity;
+        $activity->activity_type_id = ActivityType::UNLOAD_SHIP;
+        $activity->avatar_id = $avatar_id;
+        $activity->started_at = date("Y-m-d H:i:s");
+        $activity->save();
     }
     public static function wander($avatar_id){
         Activity::end_last($avatar_id);

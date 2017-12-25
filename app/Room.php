@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Room extends Model
 {
+    const STORAGE_ROOM = 2;
     const SHIP = 4;
 
     public function building(){
@@ -24,7 +25,7 @@ class Room extends Model
         foreach($items as $item){
             $total_cubic_meters += $item->quantity*$item->type->cubic_meters;
         }
-        $room = Room::find($id);        
+        $room = Room::find($id);
         $room->current_storage = ceil($total_cubic_meters);
         $room->save();
     }

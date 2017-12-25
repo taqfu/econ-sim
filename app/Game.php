@@ -17,7 +17,9 @@ class Game extends Model
           && count($shipments)>0 && $hour>=9 && $hour<=17){
             $overseer = Job::where('job_type_id', JobType::OVERSEER)->whereNull('fired_at')->whereNull('promoted_at')->first();
             Room::clear_ship(Room::SHIP);
-
+            $room = Room::find(Room::SHIP);
+            $room->visibility=true;
+            $room->save();
             foreach($shipments as $shipment){
                 $shipment->delivered_at = date("Y-m-d H:i:s");
                 $shipment->save();
@@ -28,10 +30,11 @@ class Game extends Model
                   $week + 1 > 4 ? 1 : $week + 1);
             }
             $activity = Activity::fetch_current($overseer->employee_avatar_id);
+            //DISABLED UNTIL ACTIVITY LOG GOES ACTIVE
             if (Schedule::fetch_type($overseer->employee_avatar_id, $hour) != Schedule::WORK){
-                Job::fire_employee($overseer->id);
+                //Job::fire_employee($overseer->id);
             } else if ($activity->type->id == ActivityType::SLEEP){
-                Job::fire_employee($overseer->id);
+                //Job::fire_employee($overseer->id);
             }
         }
 
@@ -86,6 +89,8 @@ class Game extends Model
             } else if ($activity!=null &&  $activity->type->id==ActivityType::WANDER){
 
                 Avatar::wander($avatar->id);
+            } else if ($activity!=null &&  $activity->type->id==ActivityType::UNLOAD_SHIP){
+                Avatar::unload_ship($avatar->id);
             }
 
             if (!$avatar->exhausted && $schedule_type==0){
@@ -114,6 +119,33 @@ class Game extends Model
                 if ($activity->type->id != ActivityType::WANDER){
                     echo "Wandering \n";
                     Activity::wander($avatar->id);
+                }
+            } else if (!$avatar->exhausted && $schedule_type==2 ){
+                if (Avatar::are_they_in_the_building($avatar->id, $avatar->job->building->id)){
+                    $room = Room::find(Room::SHIP);
+                    if ($room->current_storage>0){
+                        if ($activity==null || ($activity!=null && $activity->type->id != ActivityType::UNLOAD_SHIP)){
+                            Activity::unload_ship($avatar->id);
+                        }
+                        //unload ship
+                    } else {
+                        if ($room->visibility){
+                            $room->visibility=false;
+                            $room->save();
+                        }
+                        if ($activity==null || ($activity!=null && $activity->type->id != ActivityType::PAPERWORK)){
+                            Activity::fill_out_paperwork($avatar->id);
+                        }
+                    }
+                } else {
+                    if ($activity==null || ($activity!=null && $activity->type->id != ActivityType::HEAD_TO_WORK)){
+                        Activity::head_to_work($avatar->id);
+                    }
+                    $new_pos = Building::fetch_center_pos($avatar->job->building->id);
+                    echo "Heading from (" . $avatar->x . ", " . $avatar->y
+                      . ") to (" . $new_pos['x'] . ", " . $new_pos['y']
+                      . ") to go to work\n";
+                    Avatar::move_towards($avatar->id, $new_pos);
                 }
             }
 

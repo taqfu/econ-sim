@@ -49,6 +49,9 @@ class RoomController extends Controller
     {
       Room::update_storage($id);
       $room = Room::find($id);
+      if (!$room->visibility){
+          return "There's nothing to see here. Move on.";
+      }
       $items = Item::where('room_id', $id)->get();
       return view('Room.show',[
           "room"=>$room,

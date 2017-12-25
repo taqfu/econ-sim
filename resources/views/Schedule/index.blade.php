@@ -51,7 +51,9 @@
             <td class='schedule-cell
             @if ($schedule_type==2)
                 info
-            @elseif ($schedule_type!=2 && ($hour>=$avatar->job->starts_on_hour && $hour<=$avatar->job->ends_on_hour))
+            @elseif ($avatar->job_id!=null && $schedule_type!=2
+              && ($hour>=$avatar->job->starts_on_hour
+              && $hour<=$avatar->job->ends_on_hour))
                 danger
 
             @endif

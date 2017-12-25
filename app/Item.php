@@ -23,5 +23,6 @@ class Item extends Model
             $item->quantity += $quantity;
             $item->save();
         }
+        Room::update_storage($room_id);
     }
 }

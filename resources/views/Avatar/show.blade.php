@@ -66,7 +66,7 @@ use App\Schedule;
 </div>
 <div class='col-md-2'>
     <div>
-        <a href="{{route('schedule.index')}}">Schedule</a>
+        <a href="{{route('schedule.index', ['avatar_id'=>$avatar->id])}}">Schedule</a>
     </div>
 </div>
 </div>

@@ -14,12 +14,12 @@ class ScheduleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($avatar_id)
     {
         if (Auth::guest()){
             echo "You need to be logged in in order to do this.";
         }
-        $schedules = Schedule::where("user_id", Auth::user()->id)->orderBy('hour')->get();
+        $schedules = Schedule::where("avatar_id", $avatar_id)->orderBy('hour')->get();
         $num_of_sleep_hours = count(Schedule::where("user_id", Auth::user()->id)->where('type', 0)->orderBy('hour')->get());
         return view("Schedule.index", [
           "schedules"=>$schedules,

@@ -13,13 +13,12 @@ class Game extends Model
         $week = Game::fetch_week();
         $hour = Game::fetch_hour();
         $shipments = Shipment::whereNull('delivered_at')->where('week', $week)->get();
-        if (Shipment::fetch_num_of_days_until_shipment()==0
+
+        if (Shipment::fetch_num_of_days_until_shipment()==2
           && count($shipments)>0 && $hour>=9 && $hour<=17){
             $overseer = Job::where('job_type_id', JobType::OVERSEER)->whereNull('fired_at')->whereNull('promoted_at')->first();
             Room::clear_ship(Room::SHIP);
-            $room = Room::find(Room::SHIP);
-            $room->visibility=true;
-            $room->save();
+            Room::make_visible(Room::SHIP);
             foreach($shipments as $shipment){
                 $shipment->delivered_at = date("Y-m-d H:i:s");
                 $shipment->save();
@@ -81,7 +80,6 @@ class Game extends Model
 
             if ($activity!=null && $activity->type->id==ActivityType::SLEEP){
                 $num_of_hours_sleeping = Avatar::fetch_hours_of_sleep($activity);
-                //var_dump(floor($num_of_hours_sleeping), $avatar->sleep);
                 if (floor($num_of_hours_sleeping)!=$avatar->sleep){
                     Avatar::increase_sleep($activity);
                     echo "Avatar #" . $avatar->id . " has been sleeping for " . $avatar->sleep . " hours. \n";
@@ -101,6 +99,7 @@ class Game extends Model
                         Activity::sleep($avatar->id);
                     } else {
                         if ($activity==null || ($activity!=null && $activity->type->id != ActivityType::HEAD_TO_BED)){
+                            echo "Heading to work\n";
                             Activity::head_to_bed($avatar->id);
                         }
                         $new_pos = Building::fetch_center_pos($nearest_building_to_sleep->id);
@@ -112,6 +111,7 @@ class Game extends Model
 
                 } else {
                     if ($activity->type->id != ActivityType::SLEEP){
+                        echo "Heading to sleep \n";
                         Activity::sleep($avatar->id);
                     }
                 }
@@ -123,22 +123,25 @@ class Game extends Model
             } else if (!$avatar->exhausted && $schedule_type==2 ){
                 if (Avatar::are_they_in_the_building($avatar->id, $avatar->job->building->id)){
                     $room = Room::find(Room::SHIP);
+
                     if ($room->current_storage>0){
                         if ($activity==null || ($activity!=null && $activity->type->id != ActivityType::UNLOAD_SHIP)){
+                            echo "Unloading a ship \n";
                             Activity::unload_ship($avatar->id);
                         }
                         //unload ship
                     } else {
                         if ($room->visibility){
-                            $room->visibility=false;
-                            $room->save();
+                            Room::make_invisible(Room::SHIP);
                         }
                         if ($activity==null || ($activity!=null && $activity->type->id != ActivityType::PAPERWORK)){
+                            echo "Filling out paperwork\n";
                             Activity::fill_out_paperwork($avatar->id);
                         }
                     }
                 } else {
                     if ($activity==null || ($activity!=null && $activity->type->id != ActivityType::HEAD_TO_WORK)){
+                        echo "Heading to work \n";
                         Activity::head_to_work($avatar->id);
                     }
                     $new_pos = Building::fetch_center_pos($avatar->job->building->id);

@@ -122,7 +122,7 @@ class Avatar extends Model
 						}
 						$new_pos = ["x"=>$player_pos['x'] + $x_offset,
 							"y"=>$player_pos['y'] + $y_offset];
-						echo "X:" . $x_offset . "/Y:" . $y_offset . ": Trying (" . $new_pos["x"] . ", " . $new_pos["y"] . ")\n";
+						//echo "X:" . $x_offset . "/Y:" . $y_offset . ": Trying (" . $new_pos["x"] . ", " . $new_pos["y"] . ")\n";
 						$map = Map::where("x", $new_pos["x"])->where("y", $new_pos["y"])->first();
 
 						if ($player_pos!=$new_pos && $new_pos["x"]>=0 && $new_pos["x"]< Map :: MAX_X
@@ -131,11 +131,11 @@ class Avatar extends Model
 								$meter++;
 								$moves[] = $new_pos;
 								$player_pos = $new_pos;
-								echo "Meter #" . $meter . " : (" . $player_pos["x"] . ", " . $player_pos["y"] . ")\n";
+							//	echo "Meter #" . $meter . " : (" . $player_pos["x"] . ", " . $player_pos["y"] . ")\n";
 						}
 				}
 				//var_dump($pos, $player_pos, $new_pos);
-				echo "Ended up at (" . $player_pos["x"] . ", " . $player_pos["y"] . ")\n";
+				//echo "Ended up at (" . $player_pos["x"] . ", " . $player_pos["y"] . ")\n";
 				$avatar_db = Avatar::find($avatar->id);
 				$avatar_db->x = $player_pos["x"];
 				$avatar_db->y = $player_pos["y"];
@@ -219,7 +219,7 @@ class Avatar extends Model
 								$player_pos = $new_player_pos;
 						}
 				}
-				echo "Wandering: moving from (" . $avatar->x . ", " . $avatar->y . ") to (" . $new_player_pos["x"] . ", " . $new_player_pos["y"] . ")\n";
+				//echo "Wandering: moving from (" . $avatar->x . ", " . $avatar->y . ") to (" . $new_player_pos["x"] . ", " . $new_player_pos["y"] . ")\n";
 
 				$avatar_db = Avatar::find($avatar->id);
 				$avatar_db->x = $new_player_pos["x"];

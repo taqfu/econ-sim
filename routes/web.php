@@ -38,3 +38,5 @@ Route::resource('room', 'RoomController');
 Route::resource('RoomType', 'RoomTypeController');
 Route::resource('schedule', 'ScheduleController');
 Route::resource('shipment', 'ShipmentController');
+
+Route::get('a/{avatar_id}/schedule', 'ScheduleController@index')->name('schedule.index');

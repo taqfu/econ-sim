@@ -19,6 +19,16 @@ class Room extends Model
             $item->delete();
         }
     }
+    public static function make_invisible($id){
+      $room = Room::find($id);
+      $room->visibility=false;
+      $room->save();
+    }
+    public static function make_visible($id){
+      $room = Room::find($id);
+      $room->visibility=true;
+      $room->save();
+    }
     public static function update_storage($id){
         $total_cubic_meters=0;
         $items = Item::where('room_id', $id)->get();

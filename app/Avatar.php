@@ -152,9 +152,27 @@ class Avatar extends Model
 						if ($item_in_inventory->quantity
 							* $item_in_inventory->type->cubic_meters
 							<= $storage_room->max_storage - $storage_room->current_storage){
-								$item_in_inventory->inventory_avatar_id = null;
-								$item_in_inventory->hauling = false;
-								$item_in_inventory->save();
+
+								$matching_item_in_the_storage_room
+									= Item::where('room_id', Room::STORAGE_ROOM)
+									->where('hauling', false)
+									->where('item_type_id', $item_in_inventory->item_type_id)
+									->first();
+
+
+
+								if ($matching_item_in_the_storage_room!=null){
+										$matching_item_in_the_storage_room->quantity
+											+= $item_in_inventory->quantity;
+										$matching_item_in_the_storage_room->save();
+										$item_in_inventory->delete();
+
+								} else {
+									$item_in_inventory->inventory_avatar_id = null;
+									$item_in_inventory->hauling = false;
+									$item_in_inventory->save();
+								}
+
 								Room::update_storage(Room::STORAGE_ROOM);
 						}
 				}
@@ -219,7 +237,6 @@ class Avatar extends Model
 								$player_pos = $new_player_pos;
 						}
 				}
-				//echo "Wandering: moving from (" . $avatar->x . ", " . $avatar->y . ") to (" . $new_player_pos["x"] . ", " . $new_player_pos["y"] . ")\n";
 
 				$avatar_db = Avatar::find($avatar->id);
 				$avatar_db->x = $new_player_pos["x"];

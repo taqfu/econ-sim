@@ -16,6 +16,26 @@ class Avatar extends Model
 				return $this->hasOne('App\Job', 'id', 'job_id');
 
 		}
+
+		public static function add_to_inventory($id, $item_id){
+				$avatar = Avatar::find($id);
+				$item = Item::find($item_id);
+				$item_in_inventory = Item::where('item_type_id', $item->type->id)
+					->where('inventory_avatar_id', $id)->where('hauling', false)
+					->where('owner_avatar_id', $id)->first();
+				if ($item_in_inventory==null){
+						$item->room_id = null;
+						$item->inventory_avatar_id = $id;
+						$item->owner_avatar_id = $id;
+						$item->hauling = false;
+						$item->save();
+
+				} else {
+						$item_in_inventory->quantity += $item->quantity;
+						$item_in_inventory->save();
+						$item->delete();
+				}
+		}
 		public static function are_they_in_the_building($id, $building_id){
 			$avatar = Avatar::find($id);
 			$building = Building::find($building_id);

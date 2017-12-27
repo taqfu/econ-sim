@@ -12,7 +12,59 @@ class Game extends Model
     public static function run(){
         $week = Game::fetch_week();
         $hour = Game::fetch_hour();
+        $day = Game::fetch_day();
         $shipments = Shipment::whereNull('delivered_at')->where('week', $week)->get();
+        if ($day % 6 == 0){
+            $jobs = Job::whereNotNull('employee_avatar_id')
+              ->whereNull('fired_at')->whereNull('promoted_at')
+              ->where('last_paid_on_week', '!=', $week)->get();
+            foreach ($jobs as $job){
+                if ($job->gold_wage>0){
+                    $gold = Item::where('item_type_id', ItemType::GOLD)
+                      ->whereNull('owner_avatar_id')
+                      ->where('room_id', Room::STORAGE_ROOM)->first();
+                    $gold->quantity -= $job->gold_wage;
+                    $gold->save();
+                    $gold_stack = Item::where('item_type_id', ItemType::GOLD)
+                      ->where('owner_avatar_id', $job->employee_avatar_id)
+                      ->where('room_id', Room::STORAGE_ROOM)->first();
+                    if ($gold_stack==null){
+                        $gold_payment = new Item;
+                        $gold_payment->owner_avatar_id = $job->employee_avatar_id;
+                        $gold_payment->item_type_id = ItemType::GOLD;
+                        $gold_payment->room_id = Room::STORAGE_ROOM;
+                        $gold_payment->quantity = $job->gold_wage;
+                        $gold_payment->save();
+                    } else {
+                        $gold_stack->quantity += $job->gold_wage;
+                        $gold_stack->save();
+                    }
+                }
+                if ($job->silver_wage>0){
+                    $silver = Item::where('item_type_id', ItemType::SILVER)
+                      ->whereNull('owner_avatar_id')
+                      ->where('room_id', Room::STORAGE_ROOM)->first();
+                    $silver->quantity -= $job->silver_wage;
+                    $silver->save();
+                    $silver_stack = Item::where('item_type_id', ItemType::GOLD)
+                      ->where('owner_avatar_id', $job->employee_avatar_id)
+                      ->where('room_id', Room::STORAGE_ROOM)->first();
+                    if ($silver_stack==null){
+                        $silver_payment = new Item;
+                        $silver_payment->owner_avatar_id = $job->employee_avatar_id;
+                        $silver_payment->item_type_id = ItemType::SILVER;
+                        $silver_payment->room_id = Room::STORAGE_ROOM;
+                        $silver_payment->quantity = $job->silver_wage;
+                        $silver_payment->save();
+                    } else {
+                        $silver_stack->quantity += $job->silver_wage;
+                        $silver_stack->save();
+                    }
+                }
+                $job->last_paid_on_week = $week;
+                $job->save();
+            }
+        }
 
         if (Shipment::fetch_num_of_days_until_shipment()==0
           && count($shipments)>0 && $hour>=9 && $hour<=17){
@@ -95,8 +147,12 @@ class Game extends Model
                 $nearest_building_to_sleep = Avatar::fetch_nearest_place_to_sleep($avatar->id);
                 if ($nearest_building_to_sleep!=null){
                     if (Avatar::are_they_in_the_building($avatar->id, $nearest_building_to_sleep->id)){
-                        echo "Going to sleep inside room\n";
-                        Activity::sleep($avatar->id);
+                        if ($activity==null || ($activity!=null
+                          && $activity->type->id != ActivityType::SLEEP)){
+                            echo "Going to sleep inside room\n";
+
+                            Activity::sleep($avatar->id);
+                        }
                     } else {
                         if ($activity==null || ($activity!=null && $activity->type->id != ActivityType::HEAD_TO_BED)){
                             echo "Heading to work\n";
@@ -122,6 +178,15 @@ class Game extends Model
                 }
             } else if (!$avatar->exhausted && $schedule_type==2 ){
                 if (Avatar::are_they_in_the_building($avatar->id, $avatar->job->building->id)){
+
+                    $wages = Item::where('owner_avatar_id', $avatar->id)
+                      ->whereIn('item_type_id', ItemType::WAGES)
+                      ->where('room_id', Room::STORAGE_ROOM)
+                      ->whereNull('inventory_avatar_id')->where('hauling', false)
+                      ->get();
+                    foreach ($wages as $wage){
+                        Avatar::add_to_inventory($avatar->id, $wage->id);
+                    }
                     $room = Room::find(Room::SHIP);
                     $are_they_hauling_something
                       = count(Item::where('inventory_avatar_id', $avatar->id)
@@ -171,8 +236,8 @@ class Game extends Model
         $ig_month = date("z") % 12;
         $ig_hour = Game::fetch_hour();
         $ig_minute = floor((($minute + (round(($second+1)/60, 2)))/2.5 - floor(($minute + (round(($second+1)/60, 2)))/2.5))*60);
-        $ig_day = $hour;
-        $ig_week = ceil($ig_day/6);
+        $ig_day = Game::fetch_day();
+        $ig_week = Game::fetch_week();
 
         if ($ig_hour < 10){
            $ig_hour = "0" . $ig_hour;
@@ -186,8 +251,13 @@ class Game extends Model
     }
 
     public static function fetch_week(){
-        return ceil(date("G")/6);
+        $week = ceil(date("G")/6);
+        return $week == 0 ? 1 : $week;
 
+    }
+    public static function fetch_day(){
+        $day = date("G") + 1;
+        return $day;
     }
     public static function fetch_hour(){
         $minute = date("i");

@@ -76,6 +76,7 @@ class AvatarController extends Controller
      */
     public function show($id)
     {
+
         $activity = Activity::fetch_current($id);
         $avatar=Avatar::find($id);
         $map = Map::fetch_player_map($avatar->x, $avatar->y);

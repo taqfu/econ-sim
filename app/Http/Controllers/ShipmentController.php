@@ -36,13 +36,21 @@ class ShipmentController extends Controller
                 $are_they_an_overseer = true;
             }
         }
-        $item_types = ItemType::whereIn('id', $item_type_ids)->get();
+        $shipment_item_types
+          = ItemType::whereNotNull('shipment_unload_to_room_id')->get();
+        $item_types = ItemType::
+          orWhere('shipment_per_ship', '>', 0)->whereNull('shipment_unload_to_room_id')
+
+          ->orWhere('reserve', '>', 0)->whereNull('shipment_unload_to_room_id')
+          ->orWhere('shipment_per_person', '>', 0)->whereNull('shipment_unload_to_room_id')->get();
         $population = Avatar::fetch_population();
         return view('Shipment.create', [
-            "item_types"=>$item_types,
             "are_they_an_overseer"=>$are_they_an_overseer,
-            "population"=>$population,
             "days_until_next_shipment"=>$days_until_shipment,
+            "item_types"=>$item_types,
+            "population"=>$population,
+            "shipment_item_types"=>$shipment_item_types
+
         ]);
     }
 
